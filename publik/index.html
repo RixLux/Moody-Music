@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mood Music - Temukan Lagumu</title>
+    <link rel="stylesheet" href="gaya.css">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+
+    <div id="halaman-home">
+        <header class="navbar">
+            <div class="logo">🎵 MoodMusic</div>
+            <button class="btn-nav" onclick="navigasi('login')">Masuk / Daftar</button>
+        </header>
+
+        <section class="hero-section">
+            <h1>Musik Sesuai Perasaanmu</h1>
+            <p>Curhatlah pada bot kami, dan dapatkan rekomendasi lagu terbaik beserta video musiknya secara instan.</p>
+            <button class="btn-cta" onclick="navigasi('daftar')">Mulai Sekarang 🚀</button>
+        </section>
+
+        <section class="features">
+            <div class="card-feature">
+                <span class="icon">🤖</span>
+                <h3>AI ChatBot</h3>
+                <p>Teman curhat pintar yang mengerti mood kamu.</p>
+            </div>
+            <div class="card-feature">
+                <span class="icon">🎧</span>
+                <h3>Rekomendasi</h3>
+                <p>Dapatkan lagu YouTube yang pas dengan suasana hati.</p>
+            </div>
+            <div class="card-feature">
+                <span class="icon">🔒</span>
+                <h3>Privasi Aman</h3>
+                <p>Chat aman, terenkripsi, dan bisa dihapus kapan saja.</p>
+            </div>
+        </section>
+        
+        <footer style="text-align: center; padding: 20px; color: #888;">
+            &copy; 2025 Mood Music Project. Dibuat dengan Node.js & Socket.IO
+        </footer>
+    </div>
+
+
+    <div id="halaman-auth" class="container-center hidden">
+        
+        <div id="form-login" class="kotak-auth">
+            <h2>👋 Selamat Datang Kembali</h2>
+            <p>Masuk untuk lanjut mendengarkan.</p>
+            <p id="err-login" style="color:red; display:none;"></p>
+            
+            <input type="text" id="logUser" placeholder="Username">
+            <input type="password" id="logPass" placeholder="Password">
+            <button class="btn-submit" onclick="prosesLogin()">Masuk</button>
+            
+            <p style="margin-top:20px;">
+                Belum punya akun? <span class="link-text" onclick="tampilForm('daftar')">Daftar disini</span>
+            </p>
+            <p><span class="link-text" onclick="navigasi('home')">← Kembali ke Home</span></p>
+        </div>
+
+        <div id="form-daftar" class="kotak-auth hidden">
+            <h2>📝 Buat Akun Baru</h2>
+            <p>Gabung dan temukan musikmu.</p>
+            <p id="err-daftar" style="color:red; display:none;"></p>
+            <p id="suc-daftar" style="color:green; display:none;"></p>
+
+            <input type="text" id="regUser" placeholder="Username">
+            <input type="text" id="regNama" placeholder="Nama Lengkap">
+            <input type="email" id="regEmail" placeholder="Email">
+            <input type="password" id="regPass" placeholder="Password">
+            <button class="btn-submit" onclick="prosesDaftar()">Daftar Akun</button>
+
+            <p style="margin-top:20px;">
+                Sudah punya akun? <span class="link-text" onclick="tampilForm('login')">Login disini</span>
+            </p>
+        </div>
+    </div>
+
+
+    <div id="halaman-chat" class="hidden">
+        <div class="chat-wrapper">
+            <div class="chat-header">
+                <div>
+                    <strong>Mood Music Bot</strong><br>
+                    <small id="labelUser" style="opacity: 0.8;">User: -</small>
+                </div>
+                <button class="btn-danger" onclick="hapusRiwayat()">🗑️ Reset</button>
+                <button class="btn-danger" style="background:#555;" onclick="logout()">Keluar</button>
+            </div>
+
+            <div id="kotak-pesan" class="area-pesan">
+                </div>
+
+            <div class="area-input">
+                <input type="text" id="inputMood" placeholder="Ketik mood (cth: sedih)..." onkeypress="cekEnter(event)">
+                <button class="btn-kirim" onclick="kirimPesan()">➤</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+        let userAktif = null;
+
+        // --- NAVIGASI HALAMAN ---
+        function navigasi(tujuan) {
+            // Sembunyikan semua halaman dulu
+            document.getElementById('halaman-home').classList.add('hidden');
+            document.getElementById('halaman-auth').classList.add('hidden');
+            document.getElementById('halaman-chat').classList.add('hidden');
+
+            // Tampilkan tujuan
+            if (tujuan === 'home') {
+                document.getElementById('halaman-home').classList.remove('hidden');
+            } else if (tujuan === 'login' || tujuan === 'daftar') {
+                document.getElementById('halaman-auth').classList.remove('hidden');
+                tampilForm(tujuan); // Pilih mau nampilin form login atau daftar
+            } else if (tujuan === 'chat') {
+                document.getElementById('halaman-chat').classList.remove('hidden');
+            }
+        }
+
+        // Switch antara kotak Login dan Daftar
+        function tampilForm(tipe) {
+            document.getElementById('form-login').classList.add('hidden');
+            document.getElementById('form-daftar').classList.add('hidden');
+            
+            if(tipe === 'login') document.getElementById('form-login').classList.remove('hidden');
+            else document.getElementById('form-daftar').classList.remove('hidden');
+        }
+
+        // --- LOGIKA API (Backend) ---
+        async function prosesDaftar() {
+            const data = {
+                username: document.getElementById('regUser').value,
+                nama_lengkap: document.getElementById('regNama').value,
+                email: document.getElementById('regEmail').value,
+                password: document.getElementById('regPass').value
+            };
+
+            try {
+                const res = await fetch('/api/registrasi', {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+                const hasil = await res.json();
+                
+                if(res.ok) {
+                    document.getElementById('suc-daftar').innerText = "Sukses! Silakan Login.";
+                    document.getElementById('suc-daftar').style.display = 'block';
+                    setTimeout(() => tampilForm('login'), 1500);
+                } else throw new Error(hasil.pesan);
+            } catch (err) {
+                document.getElementById('err-daftar').innerText = err.message;
+                document.getElementById('err-daftar').style.display = 'block';
+            }
+        }
+
+        async function prosesLogin() {
+            const data = {
+                username: document.getElementById('logUser').value,
+                password: document.getElementById('logPass').value
+            };
+
+            try {
+                const res = await fetch('/api/login', {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+                const hasil = await res.json();
+
+                if(res.ok) {
+                    userAktif = hasil.profil;
+                    document.getElementById('labelUser').innerText = `Hai, ${userAktif.nama_lengkap}`;
+                    socket.emit('pengguna_masuk', userAktif); // Connect socket
+                    navigasi('chat'); // Pindah ke halaman chat
+                } else throw new Error(hasil.pesan);
+            } catch (err) {
+                document.getElementById('err-login').innerText = err.message;
+                document.getElementById('err-login').style.display = 'block';
+            }
+        }
+
+        function logout() {
+            userAktif = null;
+            location.reload(); // Refresh halaman kembali ke home
+        }
+
+        // --- LOGIKA CHAT ---
+        function cekEnter(e) { if(e.key === 'Enter') kirimPesan(); }
+
+        function kirimPesan() {
+            const input = document.getElementById('inputMood');
+            const mood = input.value;
+            if(!mood.trim()) return;
+
+            tampilkanPesan(mood, 'user');
+            socket.emit('kirim_pesan', {
+                pesanMood: mood,
+                email: userAktif.email,
+                nama: userAktif.nama_lengkap
+            });
+            input.value = '';
+        }
+
+        function hapusRiwayat() {
+            if(confirm("Hapus semua chat?")) {
+                document.getElementById('kotak-pesan').innerHTML = '';
+                socket.emit('hapus_riwayat', userAktif.username);
+            }
+        }
+
+        function tampilkanPesan(teks, tipe) {
+            const div = document.createElement('div');
+            div.className = `pesan-container ${tipe}`;
+            
+            // Avatar (DiceBear API)
+            const seed = (tipe === 'user') ? userAktif.username : 'MoodBot';
+            const style = (tipe === 'user') ? 'avataaars' : 'bottts';
+            const avatarUrl = `https://api.dicebear.com/7.x/${style}/svg?seed=${seed}`;
+
+            div.innerHTML = `
+                <img src="${avatarUrl}" class="avatar">
+                <div class="bubble">${teks}</div>
+            `;
+            
+            const kotak = document.getElementById('kotak-pesan');
+            kotak.appendChild(div);
+            kotak.scrollTop = kotak.scrollHeight;
+        }
+
+        // --- SOCKET LISTENER ---
+        socket.on('pesan_bot', (msg) => tampilkanPesan(msg, 'bot'));
+        
+        socket.on('riwayat_dihapus', (msg) => tampilkanPesan(msg, 'bot'));
+
+        socket.on('respon_musik', (data) => {
+            const kotak = document.getElementById('kotak-pesan');
+            
+            // Indikator ngetik
+            const loading = document.createElement('div');
+            loading.className = 'ngetik';
+            loading.id = 'loading-ind';
+            loading.innerText = 'Bot sedang mencari lagu...';
+            kotak.appendChild(loading);
+            kotak.scrollTop = kotak.scrollHeight;
+
+            setTimeout(() => {
+                const el = document.getElementById('loading-ind');
+                if(el) el.remove();
+
+                tampilkanPesan(data.teks, 'bot');
+                
+                if(data.lagu && data.lagu.length > 0) {
+                    data.lagu.forEach(l => {
+                        const div = document.createElement('div');
+                        div.className = 'pesan-container bot';
+                        div.innerHTML = `
+                            <div style="width:35px"></div> <div class="bubble" style="width:100%">
+                                🎵 <b>${l.judul}</b>
+                                <iframe src="https://www.youtube.com/embed/${l.id_youtube}" allowfullscreen></iframe>
+                            </div>
+                        `;
+                        kotak.appendChild(div);
+                    });
+                }
+                kotak.scrollTop = kotak.scrollHeight;
+            }, 1500);
+        });
+    </script>
+</body>
+</html>
