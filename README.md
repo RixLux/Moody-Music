@@ -1,6 +1,7 @@
 ---
 
-#  Mood Music — ChatBot-Based Music Recommendation System
+# 🎧 Mood Music — 
+ChatBot-Based Music Recommendation System
 
 **Mood Music** adalah aplikasi backend berbasis **Node.js** yang mengintegrasikan **ChatBot real-time** untuk memberikan rekomendasi musik berdasarkan mood pengguna.
 Aplikasi ini dikembangkan sebagai bagian dari **laporan technical report**, dengan fokus pada komunikasi real-time, pemetaan mood, dan integrasi layanan pihak ketiga.
@@ -91,6 +92,7 @@ npm run start
 ```
 
 ---
+
 
 
 
