@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon aplikasi.js",
+    "start": "node aplikasi.js"
   },
   "keywords": [],
   "author": "",
@@ -19,5 +20,8 @@
     "firebase-admin": "^13.6.0",
     "nodemailer": "^7.0.11",
     "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
   }
 }
