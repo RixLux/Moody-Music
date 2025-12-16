@@ -9,6 +9,8 @@ lerna-debug.log*
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
+# Directory for sensitive data
+konfigurasi/
 # Runtime data
 pids
 *.pid
@@ -137,3 +139,11 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# MkDocs
+site/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
