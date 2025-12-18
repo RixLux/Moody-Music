@@ -1,6 +1,6 @@
 ---
 
-# 🎧 Mood Music — 
+# 🎧 Mood Music  
 ChatBot-Based Music Recommendation System
 
 **Mood Music** adalah aplikasi backend berbasis **Node.js** yang mengintegrasikan **ChatBot real-time** untuk memberikan rekomendasi musik berdasarkan mood pengguna.
@@ -9,12 +9,27 @@ Aplikasi ini dikembangkan sebagai bagian dari **laporan technical report**, deng
 ---
 
 <p align="center">
-  <strong>Baru pertama kali pakai Git?</strong><br>
-  Pelajari dasar-dasar Git dan GitHub melalui tutorial berikut:
+  <strong>Baru pertama kali pakai Git, GitHub, atau Node.js?</strong><br>
+  Pelajari dasar-dasar Git, GitHub, dan Node.js melalui tutorial berikut:
   <br><br>
+
   <a href="https://www.w3schools.com/git/default.asp?remote=github">
-    <img src="https://img.shields.io/badge/Git%20Tutorial-ffb6c1?style=for-the-badge&logo=readthedocs&logoColor=white">
+    <img
+      src="https://img.shields.io/badge/Git%20Tutorial-ffb6c1?style=for-the-badge&logo=github&logoColor=white"
+      alt="Git Tutorial"
+    />
   </a>
+<br>
+  <a href="https://www.w3schools.com/nodejs/default.asp">
+    <img
+      src="https://img.shields.io/badge/Node.js%20Tutorial-3c873a?style=for-the-badge&logo=node.js&logoColor=white"
+      alt="Node.js Tutorial"
+    />
+  </a>
+</p>
+
+<p align="center">
+  <img src="https://i.imgur.com/qrBjnkL.jpeg" width="250" alt="Up!">
 </p>
 
 ---
@@ -38,15 +53,31 @@ Aplikasi ini dikembangkan sebagai bagian dari **laporan technical report**, deng
 
 ---
 
-##  Teknologi yang Digunakan
+<h2 align="center"> Teknologi yang Digunakan</h2>
 
+<div align="center">
+  
 | Kategori                | Teknologi            |
-| ----------------------- | -------------------- |
+| :---------------------: | :------------------: |
 | Bahasa                  | JavaScript (Node.js) |
 | Web Framework           | Express.js           |
 | Real-time Communication | Socket.IO            |
 | Database                | Firebase Firestore   |
 | Email Service           | Nodemailer           |
+</div>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Node.js-3c873a?style=for-the-badge&logo=node.js&logoColor=white" />
+  <img src="https://img.shields.io/badge/Express-000000?style=for-the-badge&logo=express&logoColor=white" />
+  <br>
+  <img src="https://img.shields.io/badge/Axios-5a29e4?style=for-the-badge&logo=axios&logoColor=white" />
+  <img src="https://img.shields.io/badge/Socket.IO-010101?style=for-the-badge&logo=socket.io&logoColor=white" />
+  <br>
+  <img src="https://img.shields.io/badge/Firebase_Admin-ffca28?style=for-the-badge&logo=firebase&logoColor=black" />
+  <img src="https://img.shields.io/badge/Nodemailer-22b573?style=for-the-badge&logo=gmail&logoColor=white" />
+  <br>
+  <img src="https://img.shields.io/badge/Dotenv-ecd53f?style=for-the-badge&logo=dotenv&logoColor=black" />
+</p>
 
 ---
 
@@ -92,6 +123,7 @@ npm run start
 ```
 
 ---
+
 
 
 
