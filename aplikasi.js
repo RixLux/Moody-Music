@@ -9,6 +9,8 @@ const ruteApi = require('./rute/apiRute');
 const basisData = require('./konfigurasi/firebaseInit');
 const pengirimEmail = require('./konfigurasi/transporterEmail');
 const { dapatkanRekomendasi } = require('./layanan/logikaMusik');
+const { buatResponChat } = require('./layanan/layananChat');
+
 
 const aplikasi = express();
 const server = http.createServer(aplikasi);
@@ -37,18 +39,21 @@ io.on('connection', (soket) => {
         // 1. Ambil Quotes (API)
         let kutipan = "";
         try {
-            const resp = await axios.get('https://api.quotable.io/random');
-            kutipan = `"${resp.data.content}" - ${resp.data.author}`;
-        } catch (e) { kutipan = "Tetap semangat!"; }
+            const resp = await axios.get('https://zenquotes.io/api/random');
+	    kutipan = `"${resp.data[0].q}" — ${resp.data[0].a}`;
+  	 } catch (e) { kutipan = "Tetap semangat!"; }
 
         // 2. Rekomendasi Musik
-        const hasilMusik = dapatkanRekomendasi(pesanMood);
+        const hasilMusik = await dapatkanRekomendasi(pesanMood);
         
         // 3. Kirim Respon
-        soket.emit('respon_musik', {
-            teks: `${hasilMusik.pesan}\n\n💡 Motivasi: ${kutipan}`,
-            lagu: hasilMusik.daftar_lagu
-        });
+        const teksRespon = buatResponChat(pesanMood, kutipan);
+
+	soket.emit('respon_musik', {
+    		teks: teksRespon,
+    		lagu: hasilMusik.daftar_lagu
+	});
+
 
         // 4. Simpan ke Database
         try {
@@ -60,14 +65,14 @@ io.on('connection', (soket) => {
         } catch (err) { console.error("Gagal simpan DB"); }
 
         // 5. Kirim Email (Jika ada lagu)
-        if (email && hasilMusik.daftar_lagu.length > 0) {
-            pengirimEmail.sendMail({
-                from: 'aplikasi_musik@gmail.com',
-                to: email,
-                subject: '🎵 Rekomendasi Musik Kamu',
-                text: `Halo ${nama}, ini lagumu: ${hasilMusik.daftar_lagu.map(l=>l.judul).join(', ')}`
-            }, (err) => { if(err) console.log("Gagal kirim email"); });
-        }
+        //if (email && hasilMusik.daftar_lagu.length > 0) {
+          //  pengirimEmail.sendMail({
+              //  from: 'aplikasi_musik@gmail.com',
+            //    to: email,
+          //      subject: '🎵 Rekomendasi Musik Kamu',
+        //        text: `Halo ${nama}, ini lagumu: ${hasilMusik.daftar_lagu.map(l=>l.judul).join(', ')}`
+      //      }, (err) => { if(err) console.log("Gagal kirim email"); });
+     //   }
     });
 
     // C. [BARU] FITUR HAPUS RIWAYAT
@@ -95,7 +100,7 @@ io.on('connection', (soket) => {
     });
 });
 
-const PORT = 3000;
+const PORT = 3001;
 server.listen(PORT, () => {
     console.log(`🚀 Server berjalan di http://localhost:${PORT}`);
 });
