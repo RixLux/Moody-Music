@@ -1,90 +1,98 @@
-// app.js
 const express = require('express');
-const YTMusic = require('ytmusic-api');
+const path = require('path');
+const cors = require('cors');
+const { Innertube,UniversalCache } = require('youtubei.js');
 
 const app = express();
-const port = 3000;
+app.use(cors());
+app.use(express.static(path.join(__dirname, 'public')));
 
-const ytmusic = new YTMusic();
+let yt;
 
-(async () => {
-  await ytmusic.initialize();
-  console.log('YTMusic initialized');
-})();
+// Inisialisasi YouTubei.js
+async function initYT() {
+    try {
+        yt = await Innertube.create({ 
+            client_type: 'ANDROID',
+            // Tambahkan bagian cache ini:
+            cache: new UniversalCache(true, path.join(__dirname, '.cache'))
+        });
+        console.log('✅ YouTubei.js Ready (Cache stored in .cache/)');
+    } catch (err) {
+        console.error('❌ Gagal Inisialisasi YouTubei:', err);
+    }
+}
+initYT();
 
-app.use(express.urlencoded({ extended: true }));
-
-// Home
 app.get('/', (req, res) => {
-  res.send(`
-    <html>
-      <head>
-        <title>Hybrid YT Music</title>
-        <style>
-          body { font-family: sans-serif; padding: 40px; }
-          input { padding: 8px; width: 260px; }
-          button { padding: 8px 12px; }
-          li { margin-bottom: 16px; }
-          a.play { text-decoration: none; color: white; background: #e11; padding: 6px 10px; border-radius: 4px; }
-        </style>
-      </head>
-      <body>
-        <h1>🎵 Hybrid YT Music Search</h1>
-
-        <form method="GET" action="/search">
-          <input name="q" placeholder="Search song or artist" />
-          <button type="submit">Search</button>
-        </form>
-      </body>
-    </html>
-  `);
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Search
-app.get('/search', async (req, res) => {
-  const query = req.query.q;
-  if (!query) return res.redirect('/');
-
-  try {
-    const results = await ytmusic.search(query, 'song');
-
-    const list = results.slice(0, 5).map(song => {
-      const videoId = song.videoId;
-      const ytMusicUrl = `https://music.youtube.com/watch?v=${videoId}`;
-
-      return `
-        <li>
-          <strong>${song.name}</strong><br />
-          ${song.artist?.name || 'Unknown Artist'}<br /><br />
-          <iframe
-  width="300"
-  height="80"
-  src="https://www.youtube.com/embed/${videoId}"
-  frameborder="0"
-  allow="autoplay">
-</iframe>
-
-        </li>
-      `;
-    }).join('');
-
-    res.send(`
-      <html>
-        <body>
-          <h2>Results for: "${query}"</h2>
-          <ul>${list}</ul>
-          <br />
-          <a href="/">← Back</a>
-        </body>
-      </html>
-    `);
-  } catch (err) {
-    console.error(err);
-    res.send('Error fetching data from YouTube Music');
-  }
+// Endpoint Search menggunakan YouTubei (Mode Music)
+app.get('/api/search', async (req, res) => {
+    const { q } = req.query;
+    if (!yt) return res.status(503).send("Server belum siap");
+    
+    try {
+        // Mencari khusus di kategori Music
+        const search = await yt.music.search(q, { type: 'song' });
+        
+        // Format agar sesuai dengan frontend lama kita
+        const results = search.contents[0].contents.map(song => ({
+            videoId: song.id,
+            name: song.title,
+            artist: { name: song.artists[0]?.name || 'Unknown Artist' },
+            thumbnails: [{ url: song.thumbnails[0]?.url }]
+        }));
+        
+        res.json(results);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Gagal mencari lagu" });
+    }
 });
 
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+// Endpoint Stream menggunakan YouTubei
+app.get('/api/stream', async (req, res) => {
+    const { id } = req.query;
+    if (!yt) return res.status(503).send("Server belum siap");
+
+    try {
+        console.log(`[Stream] Mengambil info untuk: ${id}`);
+        const info = await yt.getBasicInfo(id);
+        
+        // Memilih format audio saja dengan filter yang lebih spesifik
+        const format = info.chooseFormat({ 
+            type: 'audio', 
+            quality: 'best',
+            format: 'mp4' // mp4 biasanya lebih stabil untuk decipher
+        });
+
+        if (!format) {
+            throw new Error("Format audio tidak ditemukan");
+        }
+
+        // YouTubei.js: Cek apakah perlu decipher atau URL sudah ada
+        // Menggunakan metode yang lebih aman untuk mengambil URL
+        let url;
+        if (format.signature_cipher || format.cipher) {
+            url = format.decipher(yt.session.player);
+        } else {
+            url = format.url;
+        }
+
+        if (!url) throw new Error("Gagal mendapatkan URL audio");
+
+        console.log(`[Stream] URL berhasil dikirim`);
+        res.json({ url });
+    } catch (err) {
+        console.error('❌ Streaming Error:', err.message);
+        // Kirim error JSON agar frontend tidak bingung, dan jangan biarkan server crash
+        res.status(500).json({ error: "Gagal ambil stream", message: err.message });
+    }
 });
 
+const PORT = 3000;
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Moody Music running at http://localhost:${PORT}`);
+});

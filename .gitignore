@@ -147,3 +147,10 @@ site/
 .venv/
 __pycache__/
 *.pyc
+
+
+# Ignore folder cache YouTubei
+.cache/
+
+# Jaga-jaga jika masih ada yang tertinggal di root
+*-player-script.js
