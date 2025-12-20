@@ -10,8 +10,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="gaya.css">
+    <link rel="stylesheet"
+ href="https://cdn.jsdelivr.net/npm/github-markdown-css/github-markdown.min.css">
 
     <script src="/socket.io/socket.io.js"></script>
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
 
@@ -22,21 +26,21 @@
     </div>
     <div class="grid-overlay"></div>
 
-    <header class="navbar">
+   <header class="navbar">
         <div class="logo">
             <span class="logo-icon gradient-text">🎧</span>
             <span class="gradient-text">MoodMusic.ai</span>
         </div>
         <div style="display: flex; align-items: center;">
             <div class="nav-links">
-                <button class="btn-nav active" onclick="navigasi('home', this)">Beranda</button>
-                <button class="btn-nav" onclick="navigasi('about', this)">Dokumentasi</button>
+                <button class="btn-nav active" onclick="navigasi('landingPage', this)">Landing Page</button>
+                <button class="btn-nav" onclick="navigasi('about', this)">About</button> 
             </div>
-            <button class="btn-login-nav" onclick="navigasi('login')">Login Access</button>
+            <button class="btn-login-nav" onclick="navigasi('login')">Log Out</button>
         </div>
-    </header>
+    </header>  
 
-    <div id="halaman-home" class="page-content">
+    <div id="halaman-landingPage" class="page-content">
         <section class="hero-wrapper">
             <h1 class="hero-title">
                 Your Emotions,<br>
@@ -45,7 +49,7 @@
             <p class="hero-subtitle">
                 Sistem rekomendasi musik berbasis AI ChatBot real-time. Curahkan perasaanmu, dan biarkan algoritma kami menyusun soundtrack hidupmu secara instan.
             </p>
-            <button class="btn-cta-pulse" onclick="navigasi('daftar')">Mulai Eksplorasi 🚀</button>
+            <button class="btn-cta-pulse" onclick="navigasi('login')">Get Started</button>
         </section>
         
         <footer style="text-align: center; margin-top: 100px; color: var(--text-muted); opacity: 0.7;">
@@ -53,91 +57,46 @@
         </footer>
     </div>
 
-    <div id="halaman-about" class="page-content hidden">
-        <div class="about-grid">
-            <div class="grid-header fade-in">
-                 <span style="color: var(--secondary); font-weight: 600; letter-spacing: 2px; text-transform: uppercase;">Technical Documentation</span>
-                 <h1><span class="gradient-text">Mood Music</span> System</h1>
-            </div>
-            
-            <div class="cyber-panel card-info fade-in">
-                <h2 style="font-size: 2rem; margin-bottom: 20px;">🤖 ChatBot-Based Recommendation Engine</h2>
-                <p style="color: var(--text-muted); font-size: 1.1rem; line-height: 1.7;">
-                    Aplikasi backend <strong>Node.js</strong> canggih yang mengintegrasikan ChatBot real-time. Fokus utama pada pemetaan mood pengguna ke frekuensi musik yang relevan menggunakan komunikasi soket dua arah.
-                </p>
-                <div style="margin-top: 30px;">
-                    <img src="https://img.shields.io/badge/Status-Technical_Preview-8A2EFF?style=for-the-badge" alt="status">
-                </div>
-            </div>
+	<div id="halaman-about" class="page-content hidden">
+	    <div class="about-grid">
+		<div class="grid-header fade-in">
+		    <h1><span class="gradient-text">Mood Music</span> System</h1>
+		    <p style="color:var(--text-muted)">Technical Documentation Page</p>
+		</div>
 
-            <div class="cyber-panel card-image fade-in" style="padding: 10px;">
-                <img src="https://i.imgur.com/qrBjnkL.jpeg" alt="Project Illustration">
-            </div>
+		<div id="readme-content" class="markdown-body"></div>
+	    </div>
+	</div>
 
-            <div class="cyber-panel card-feature fade-in" style="color: var(--secondary);">
-                <span class="feature-icon">⚡</span><h3>Real-time Socket.IO</h3><p style="color: var(--text-muted); margin-top: 10px;">Interaksi latensi ultra-rendah instan antara klien dan server.</p>
-            </div>
-             <div class="cyber-panel card-feature fade-in" style="color: var(--primary);">
-                <span class="feature-icon">🧠</span><h3>Mood Mapping AI</h3><p style="color: var(--text-muted); margin-top: 10px;">Algoritma pencocokan input perasaan ke database lagu.</p>
-            </div>
-             <div class="cyber-panel card-feature fade-in" style="color: var(--accent-hot);">
-                <span class="feature-icon">🔥</span><h3>Firestore Database</h3><p style="color: var(--text-muted); margin-top: 10px;">Penyimpanan riwayat percakapan NoSQL yang skalabel.</p>
-            </div>
-             <div class="cyber-panel card-feature fade-in" style="color: #FFCC00;">
-                <span class="feature-icon">📨</span><h3>Nodemailer Alerts</h3><p style="color: var(--text-muted); margin-top: 10px;">Pengiriman ringkasan rekomendasi otomatis via email.</p>
-            </div>
 
-            <div class="cyber-panel card-tech fade-in">
-                <h3 style="margin-bottom: 15px;">🛠️ Teknologi Inti</h3>
-                <p style="color: var(--text-muted);">Dibangun di atas ekosistem JavaScript modern untuk kinerja tinggi.</p>
-                <div class="tech-badges">
-                    <img src="https://img.shields.io/badge/Node.js-3c873a?style=for-the-badge&logo=node.js&logoColor=white" />
-                    <img src="https://img.shields.io/badge/Express-000000?style=for-the-badge&logo=express&logoColor=white" />
-                    <img src="https://img.shields.io/badge/Socket.IO-010101?style=for-the-badge&logo=socket.io&logoColor=white" />
-                    <img src="https://img.shields.io/badge/Firebase-ffca28?style=for-the-badge&logo=firebase&logoColor=black" />
-                </div>
-            </div>
+	<div id="halaman-auth" class="page-content container-center hidden">
+	    <div id="form-login" class="cyber-panel auth-box fade-in">
+		<h2 style="font-size: 2rem; margin-bottom: 10px;">Identify Yourself</h2>
+		<p style="color: var(--text-muted); margin-bottom: 30px;">Join the Sonic</p>
+		
+		<div id="err-login" style="display: none; color: #ff4d4d; background: rgba(255, 77, 77, 0.1); padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 0.9rem; border: 1px solid #ff4d4d;"></div>
+		<div id="suc-login" style="display: none; color: #00ff88; background: rgba(0, 255, 136, 0.1); padding: 10px; border: 1px solid #00ff88; margin-bottom: 15px;"></div>
 
-            <div class="cyber-panel card-tutorials fade-in">
-                <h3>📚 Quick Start</h3>
-                <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 10px;">Baru di development? Mulai dari sini:</p>
-                <div class="badge-row-vertical">
-                    <a href="https://www.w3schools.com/git/default.asp?remote=github" target="_blank"><img src="https://img.shields.io/badge/Git_Version_Control-ffb6c1?style=for-the-badge&logo=github&logoColor=white" alt="Git Tutorial"></a>
-                    <a href="https://www.w3schools.com/nodejs/default.asp" target="_blank"><img src="https://img.shields.io/badge/Node.js_Runtime-3c873a?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js Tutorial"></a>
-                </div>
-            </div>
-
-            <div class="card-terminal fade-in" style="border-radius: 16px;">
-                <h3 style="color: var(--secondary); margin-bottom: 15px;">🚀 Initializing System Protocol</h3>
-                <p style="color: var(--text-muted); margin-bottom: 5px;">// 1. Clone Repository Source</p>
-                <pre><code><span class="cmd-prompt">$</span>git clone git@github.com:RixLux/Moody-Music.git
-<span class="cmd-prompt">$</span>cd Moody-Music</code></pre>
-                <p style="color: var(--text-muted); margin-bottom: 5px; margin-top: 20px;">// 2. Install Core Dependencies</p>
-                <pre><code><span class="cmd-prompt">$</span>npm install</code></pre>
-                 <p style="color: var(--text-muted); margin-bottom: 5px; margin-top: 20px;">// 3. Ignite Server Engine</p>
-                <pre><code><span class="cmd-prompt">$</span>npm run dev   <span style="color:#666;"># Development Mode</span></code></pre>
-            </div>
-        </div>
-    </div>
-
-    <div id="halaman-auth" class="page-content container-center hidden">
-        <div id="form-login" class="cyber-panel auth-box fade-in">
-            <h2 style="font-size: 2rem; margin-bottom: 10px;">Identify Yourself</h2>
-            <p style="color: var(--text-muted); margin-bottom: 30px;">Masuk ke dalam jaringan.</p>
-            <input type="text" id="logUser" class="input-field" placeholder="Username ID">
-            <input type="password" id="logPass" class="input-field" placeholder="Access Code (Password)">
-            <button class="btn-submit" onclick="prosesLogin()">Authenticate ➤</button>
-            <p style="margin-top:25px; color: var(--text-muted);">Belum terdaftar? <span onclick="tampilForm('daftar')" style="color: var(--secondary); cursor: pointer; font-weight: 700;">Registrasi Baru</span></p>
-        </div>
+		<input type="text" id="logUser" class="input-field" placeholder="Username">
+		<input type="password" id="logPass" class="input-field" placeholder="Password">
+		
+		<button class="btn-submit" onclick="prosesLogin()"> Login➤</button>
+		
+		<p style="margin-top:25px; color: var(--text-muted);">Belum terdaftar? <span onclick="tampilForm('daftar')" style="color: var(--secondary); cursor: pointer; font-weight: 700;">Registrasi</span></p>
+	    </div>
+	
+	
         <div id="form-daftar" class="cyber-panel auth-box hidden fade-in">
             <h2 style="font-size: 2rem; margin-bottom: 10px;">New User Entry</h2>
             <p style="color: var(--text-muted); margin-bottom: 30px;">Buat profil sonik baru.</p>
-            <input type="text" id="regUser" class="input-field" placeholder="Desired Username">
-            <input type="text" id="regNama" class="input-field" placeholder="Full Name">
+            <div id="err-daftar" style="display: none; color: #ff4d4d; background: rgba(255, 77, 77, 0.1); padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 0.9rem; border: 1px solid #ff4d4d;"></div>
+   	    <div id="suc-daftar" style="display: none; color: #00ff88; background: rgba(0, 255, 136, 0.1); padding: 10px; border: 1px solid #00ff88; margin-bottom: 15px;"></div>
+            <input type="text" id="regUser" class="input-field" placeholder="Username">
+            <input type="text" id="regNama" class="input-field" placeholder="Account Name">
             <input type="email" id="regEmail" class="input-field" placeholder="Email Address">
-            <input type="password" id="regPass" class="input-field" placeholder="Create Access Code">
+            <input type="Password" id="regPass" class="input-field" placeholder="Password">
             <button class="btn-submit" style="background: linear-gradient(135deg, var(--accent-hot), var(--primary));" onclick="prosesDaftar()">Initialize Account ➤</button>
-            <p style="margin-top:25px; color: var(--text-muted);">Sudah punya akses? <span onclick="tampilForm('login')" style="color: var(--secondary); cursor: pointer; font-weight: 700;">Kembali ke Login</span></p>
+            <p style="margin-top:25px; color: var(--text-muted);">Sudah punya akses? <span onclick="tampilForm('login')" style="color: var(--secondary); cursor: pointer; font-weight: 700;">Login</span></p>
         </div>
     </div>
 
@@ -150,8 +109,8 @@
                         <small id="labelUser" style="color: var(--text-muted);">Connected: -</small>
                     </div>
                     <div style="display: flex; gap: 10px;">
-                         <button onclick="hapusRiwayat()" style="background:rgba(255,255,255,0.05); color:var(--text-muted); padding:8px 15px; border-radius:8px; font-size: 0.8rem;">🗑️ Purge</button>
-                        <button onclick="logout()" style="background:rgba(255, 46, 99, 0.2); color:var(--accent-hot); padding:8px 15px; border-radius:8px; font-size: 0.8rem;">🛑 Disconnect</button>
+                         <button onclick="hapusRiwayat()" style="background:rgba(255,255,255,0.05); color:var(--text-muted); padding:8px 15px; border-radius:8px; font-size: 0.8rem;">Hapus History</button>
+                        <button onclick="logout()" style="background:rgba(255, 46, 99, 0.2); color:var(--accent-hot); padding:8px 15px; border-radius:8px; font-size: 0.8rem;">Disconnect</button>
                     </div>
                 </div>
             </div>
@@ -159,7 +118,7 @@
             <div id="kotak-pesan" class="area-pesan"></div>
 
             <div class="area-input">
-                <input type="text" id="inputMood" class="input-field" placeholder="Input mood parameters..." onkeypress="cekEnter(event)">
+                <input type="text" id="inputMood" class="input-field" placeholder="Ceritakan Perasaanmu" onkeypress="cekEnter(event)">
                 <button class="btn-send" onclick="kirimPesan()">➤</button>
             </div>
         </div>
@@ -169,22 +128,55 @@
         const socket = io();
         let userAktif = null;
 
+        // [MODIFIKASI] Array untuk menyimpan semua instance player YouTube
+        let youtubePlayers = [];
+
+        // [MODIFIKASI] Fungsi API YouTube Standard
+        // Dipanggil otomatis saat script API selesai dimuat
+        function onYouTubeIframeAPIReady() {
+            console.log("YouTube API Ready");
+        }
+
+        // [MODIFIKASI] Fungsi saat state player berubah (misal: dari pause ke play)
+        function onPlayerStateChange(event) {
+            // YT.PlayerState.PLAYING bernilai 1
+            if (event.data === YT.PlayerState.PLAYING) {
+                const currentPlayer = event.target;
+                
+                // Loop semua player yang ada, pause yang BUKAN player saat ini
+                youtubePlayers.forEach(player => {
+                    // Cek if player exists dan bukan player yang sedang di-klik
+                    if (player && player !== currentPlayer) {
+                        // Cek function getIframe untuk memastikan instance valid
+                        if(typeof player.pauseVideo === 'function') {
+                            player.pauseVideo();
+                        }
+                    }
+                });
+            }
+        }
+
         function navigasi(tujuan, btnElement) {
-            ['halaman-home', 'halaman-about', 'halaman-auth', 'halaman-chat'].forEach(id => {
+            ['halaman-landingPage', 'halaman-about', 'halaman-auth', 'halaman-chat'].forEach(id => {
                 document.getElementById(id).classList.add('hidden');
             });
-            if (tujuan === 'home') document.getElementById('halaman-home').classList.remove('hidden');
+            if (tujuan === 'landingPage') document.getElementById('halaman-landingPage').classList.remove('hidden');
             else if (tujuan === 'about') document.getElementById('halaman-about').classList.remove('hidden');
             else if (tujuan === 'login' || tujuan === 'daftar') {
                 document.getElementById('halaman-auth').classList.remove('hidden');
                 tampilForm(tujuan);
             }
-            else if (tujuan === 'chat') document.getElementById('halaman-chat').classList.remove('hidden');
+            else if (tujuan === 'chat') {
+                document.getElementById('halaman-chat').classList.remove('hidden');
+                // Smart scroll saat masuk halaman chat
+                const box = document.getElementById('kotak-pesan');
+                box.scrollTop = box.scrollHeight;
+            }
             
             if(btnElement) {
                  document.querySelectorAll('.btn-nav').forEach(b => b.classList.remove('active'));
                  btnElement.classList.add('active');
-            } else document.querySelectorAll('.btn-nav').forEach(b => b.classList.remove('active'));
+            } else document.querySelectorAll('.btn-nav').forEach(b => b.classList.remove('active'));  loadReadme();
             window.scrollTo(0,0);
         }
 
@@ -195,33 +187,190 @@
             else document.getElementById('form-daftar').classList.remove('hidden');
         }
 
-        async function prosesLogin() {
-            const u = document.getElementById('logUser').value;
-            const p = document.getElementById('logPass').value;
-            if(u && p) {
-                userAktif = { username: u, nama_lengkap: u, email: 'demo@mail.com' };
-                document.getElementById('labelUser').innerText = "Connected: " + u;
-                navigasi('chat');
-                socket.emit('pengguna_masuk', userAktif);
-                if(document.getElementById('kotak-pesan').children.length === 0) {
-                    tampilkanPesan("Sistem online. Ceritakan bagaimana perasaanmu, dan saya akan memproses frekuensinya.", 'bot');
-                }
-            } else { alert("ACCESS DENIED: Masukkan Username & Password."); }
-        }
-        
-        async function prosesDaftar() { alert("Simulasi: Data dikirim ke server. Silakan login."); tampilForm('login'); }
-        function logout() { userAktif = null; navigasi('home'); document.getElementById('kotak-pesan').innerHTML = '';}
-        function cekEnter(e) { if(e.key === 'Enter') kirimPesan(); }
+function clearAuthInputs() {
+    const inputs = ['logUser', 'logPass', 'regUser', 'regNama', 'regEmail', 'regPass'];
+    inputs.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+}
 
-        function kirimPesan() {
-            const inp = document.getElementById('inputMood');
-            if(!inp.value.trim()) return;
-            tampilkanPesan(inp.value, 'user');
-            socket.emit('kirim_pesan', { pesanMood: inp.value, email: userAktif.email, nama: userAktif.nama_lengkap });
-            inp.value = '';
+// Clear fields whenever the page is refreshed/loaded
+window.onload = clearAuthInputs;
+
+async function prosesLogin() {
+    const u = document.getElementById('logUser').value;
+    const p = document.getElementById('logPass').value;
+
+    // Basic validation before hitting the server
+    if (!u || !p) {
+        const errorEl = document.getElementById('err-login');
+        errorEl.innerText = "ACCESS DENIED: Masukkan Username & Password.";
+        errorEl.style.display = 'block';
+        return;
+    }
+
+    const data = { username: u, password: p };
+
+    try {
+        const res = await fetch('/api/login', {
+            method: 'POST', 
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        });
+        
+        const hasil = await res.json();
+
+       if (res.ok) {
+	    const sucEl = document.getElementById('suc-login'); // Make sure this exists in HTML
+	    
+	    // 1. Show Success Feedback
+	    if (sucEl) {
+		sucEl.innerText = "ACCESS GRANTED. Initializing Secure Connection...";
+		sucEl.style.display = 'block';
+	    }
+
+	    // 2. Prepare user data in background
+	    userAktif = hasil.profil; 
+	    document.getElementById('labelUser').innerText = `Connected: ${userAktif.nama_lengkap}`;
+	    
+	    // 3. Clear inputs immediately
+	    clearAuthInputs();
+
+	    // 4. Wait 1.5 seconds before switching to the chat interface
+	    setTimeout(() => {
+		// Reset the success message for next time
+		if (sucEl) sucEl.style.display = 'none';
+
+		// Connect socket and navigate
+		socket.emit('pengguna_masuk', userAktif); 
+		navigasi('chat'); 
+
+		// Trigger initial bot message
+		const kotakPesan = document.getElementById('kotak-pesan');
+		if (kotakPesan && kotakPesan.children.length === 0) {
+		    tampilkanPesan("Sistem online. Ceritakan bagaimana perasaanmu, dan saya akan memproses frekuensinya.", 'bot');
+		}
+	    }, 1500);
+	} else {
+            throw new Error(hasil.pesan || "Login gagal");
+        }
+    } catch (err) {
+        const errorEl = document.getElementById('err-login');
+        errorEl.innerText = err.message;
+        errorEl.style.display = 'block';
+    }
+}
+        
+      async function prosesDaftar() {
+    const data = {
+        username: document.getElementById('regUser').value,
+        nama_lengkap: document.getElementById('regNama').value,
+        email: document.getElementById('regEmail').value,
+        password: document.getElementById('regPass').value
+    };
+
+    // Reset feedback elements
+    const errEl = document.getElementById('err-daftar');
+    const sucEl = document.getElementById('suc-daftar');
+    if(errEl) errEl.style.display = 'none';
+    if(sucEl) sucEl.style.display = 'none';
+
+    try {
+        const res = await fetch('/api/registrasi', {
+            method: 'POST', 
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        });
+        
+        const hasil = await res.json();
+        
+        if (res.ok) {
+            if(sucEl) {
+                sucEl.innerText = "REGISTRATION GRANTED. Redirecting to login...";
+                sucEl.style.display = 'block';
+            }
+            
+      
+            // Wait 1.5 seconds so user can see the success message
+            setTimeout(() => tampilForm('login'), 1500);
+        } else {
+            throw new Error(hasil.pesan || "Registration failed");
+        }
+    } catch (err) {
+        if(errEl) {
+            errEl.innerText = err.message;
+            errEl.style.display = 'block';
+        }
+    }
+}
+
+function logout() {
+    // 1. Clear session data
+    userAktif = null;
+    youtubePlayers = [];
+    
+    // 2. Clear UI/Chat content
+    document.getElementById('kotak-pesan').innerHTML = '';
+    
+    // 3. Clear all input fields and hide old error messages
+    clearAuthInputs(); 
+    document.getElementById('err-login').style.display = 'none';
+    document.getElementById('err-daftar').style.display = 'none';
+
+    // 4. Reset Socket connection
+    // If you use socket.disconnect(), you usually need to 
+    // call socket.connect() or reload to allow the next user to log in.
+    socket.disconnect();
+    setTimeout(() => socket.connect(), 500); 
+
+    // 5. Return to landing page
+    navigasi('login'); 
+}
+
+function cekEnter(e) { 
+    if(e.key === 'Enter') kirimPesan(); 
+}
+
+function kirimPesan() {
+    const inp = document.getElementById('inputMood');
+    const text = inp.value.trim();
+    
+    // Guard: Don't send empty messages or if user isn't logged in
+    if(!text || !userAktif) return;
+
+    // 1. Display locally immediately
+    tampilkanPesan(text, 'user');
+
+    // 2. Emit via socket using real data from the API 'profil'
+    socket.emit('kirim_pesan', { 
+        pesanMood: text, 
+        email: userAktif.email, 
+        nama: userAktif.nama_lengkap 
+    });
+
+    // 3. Clear input
+    inp.value = '';
+}
+
+        // [MODIFIKASI] Fungsi Smart Scroll Logic
+        function smartScroll() {
+            const box = document.getElementById('kotak-pesan');
+            // Ambang batas toleransi (pixel)
+            const threshold = 150; 
+            // Cek apakah user sudah di posisi bawah (atau dekat bawah) SEBELUM pesan baru ditambah
+            // Rumus: Total Tinggi - (Scroll Saat Ini + Tinggi Layar)
+            const distanceFromBottom = box.scrollHeight - (box.scrollTop + box.clientHeight);
+            
+            // Return true jika user ada di bawah, return false jika user sedang scroll ke atas
+            return distanceFromBottom < threshold;
         }
 
         function tampilkanPesan(text, type) {
+            const box = document.getElementById('kotak-pesan');
+            // Cek posisi scroll user sebelum menambah elemen
+            const shouldScroll = smartScroll();
+
             const wrapper = document.createElement('div');
             wrapper.className = `pesan-wrapper ${type}`;
             
@@ -245,18 +394,31 @@
                  wrapper.appendChild(bubble);
             }
             
-            const box = document.getElementById('kotak-pesan');
             box.appendChild(wrapper);
-            box.scrollTop = box.scrollHeight;
+
+            // [MODIFIKASI] Hanya scroll otomatis jika user sebelumnya memang di paling bawah
+            // Jika user pesan pertama kali, paksa scroll
+            if (shouldScroll || box.children.length < 3) {
+                box.scrollTop = box.scrollHeight;
+            }
         }
 
-        function hapusRiwayat() { document.getElementById('kotak-pesan').innerHTML = ''; }
+        function hapusRiwayat() { 
+            document.getElementById('kotak-pesan').innerHTML = ''; 
+            youtubePlayers = []; // Reset player array
+        }
         
         socket.on('pesan_bot', (msg) => tampilkanPesan(msg, 'bot'));
+        
         socket.on('respon_musik', (data) => {
+            // Pesan teks bot
             tampilkanPesan(data.teks, 'bot');
+
             if(data.lagu) {
-                data.lagu.forEach(l => {
+                const box = document.getElementById('kotak-pesan');
+                const shouldScroll = smartScroll(); // Cek scroll state
+
+                data.lagu.forEach((l, index) => {
                     const wrapper = document.createElement('div');
                     wrapper.className = 'pesan-wrapper bot';
                     
@@ -270,17 +432,64 @@
                     bubble.className = 'bubble';
                     bubble.style.width = '100%';
                     bubble.style.background = 'rgba(0,0,0,0.3)';
-                    bubble.innerHTML = `
-                        <div style="font-weight:bold; color:var(--secondary); margin-bottom:5px;">🎵 ${l.judul}</div>
-                        <iframe src="https://www.youtube.com/embed/${l.id_youtube}" style="width:100%; aspect-ratio:16/9; border:none; border-radius:8px;"></iframe>`;
+                    
+                    // [MODIFIKASI] Membuat container unik untuk setiap player YouTube
+                    // Kita generate ID acak biar tidak bentrok
+                    const uniqueId = 'yt-player-' + Math.floor(Math.random() * 1000000);
+                    
+                    // Kita siapkan div kosong untuk diganti oleh YouTube API, bukan iframe langsung
+                    const containerVideo = document.createElement('div');
+                    containerVideo.innerHTML = `<div style="font-weight:bold; color:var(--secondary); margin-bottom:5px;">🎵 ${l.judul}</div>`;
+                    
+                    const playerDiv = document.createElement('div');
+                    playerDiv.id = uniqueId; // ID ini dipakai API
+                    playerDiv.style.width = '100%';
+                    playerDiv.style.aspectRatio = '16/9';
+                    playerDiv.style.borderRadius = '8px';
+                    
+                    containerVideo.appendChild(playerDiv);
+                    bubble.appendChild(containerVideo);
                     
                     wrapper.appendChild(avatarImg);
                     wrapper.appendChild(bubble);
-                    document.getElementById('kotak-pesan').appendChild(wrapper);
+                    box.appendChild(wrapper);
+
+                    // [MODIFIKASI] Inisialisasi Player YouTube
+                    // Kita bungkus di setTimeout(0) agar DOM selesai render dulu
+                    setTimeout(() => {
+                        if (window.YT && window.YT.Player) {
+                            const player = new YT.Player(uniqueId, {
+                                height: '100%',
+                                width: '100%',
+                                videoId: l.id_youtube,
+                                events: {
+                                    'onStateChange': onPlayerStateChange
+                                }
+                            });
+                            youtubePlayers.push(player);
+                        }
+                    }, 100);
                 });
-                document.getElementById('kotak-pesan').scrollTop = document.getElementById('kotak-pesan').scrollHeight;
+
+                // [MODIFIKASI] Scroll logic
+                if (shouldScroll) {
+                    box.scrollTop = box.scrollHeight;
+                }
             }
         });
+        
+	 async function loadReadme() {
+	    try {
+		const res = await fetch("/README.md");
+		const markdown = await res.text();
+
+		document.getElementById("readme-content").innerHTML =
+		    marked.parse(markdown);
+	    } catch (err) {
+		console.error("Gagal load README:", err);
+	    }
+	}
+       
     </script>
 </body>
 </html>

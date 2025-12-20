@@ -20,6 +20,10 @@ aplikasi.use(bodyParser.json());
 aplikasi.use(express.static(path.join(__dirname, 'publik')));
 aplikasi.use('/api', ruteApi);
 
+aplikasi.get("/README.md", (req, res) => {
+    res.sendFile(path.join(__dirname, "README.md"));
+});
+
 // ================= SOCKET LOGIC =================
 io.on('connection', (soket) => {
     console.log('🔗 Pengguna terhubung');
@@ -70,22 +74,22 @@ io.on('connection', (soket) => {
         }
 
         // 5. Kirim Email (opsional)
-        if (email && hasilMusik.daftar_lagu.length > 0) {
-            pengirimEmail.sendMail(
-                {
-                    from: 'aplikasi_musik@gmail.com',
-                    to: email,
-                    subject: '🎵 Rekomendasi Musik Kamu',
-                    text: `Halo ${nama}, ini rekomendasi lagumu:\n\n` +
-                        hasilMusik.daftar_lagu
-                            .map(l => `- ${l.judul}`)
-                            .join('\n')
-                },
-                (err) => {
-                    if (err) console.log("❌ Gagal kirim email:", err);
-                }
-            );
-        }
+       // if (email && hasilMusik.daftar_lagu.length > 0) {
+         //   pengirimEmail.sendMail(
+           //     {
+             //       from: 'aplikasi_musik@gmail.com',
+               //     to: email,
+                 //   subject: '🎵 Rekomendasi Musik Kamu',
+                   // text: `Halo ${nama}, ini rekomendasi lagumu:\n\n` +
+                     //   hasilMusik.daftar_lagu
+                      //      .map(l => `- ${l.judul}`)
+                        //    .join('\n')
+              //  },
+               // (err) => {
+                //    if (err) console.log("❌ Gagal kirim email:", err);
+               // }
+            //);
+       // }
     });
 
     // C. HAPUS RIWAYAT
