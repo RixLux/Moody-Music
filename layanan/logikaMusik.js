@@ -1,64 +1,73 @@
-const YTMusic = require('ytmusic-api');
+const path = require('path');
+const { Innertube, UniversalCache } = require('youtubei.js');
 
-const ytmusic = new YTMusic();
+let yt;
 let siap = false;
 
+// Inisialisasi menggunakan logika YouTubei.js yang kamu kirim
 (async () => {
-  await ytmusic.initialize();
-  siap = true;
-  console.log('[YTMusic] ready');
+    try {
+        yt = await Innertube.create({ 
+            client_type: 'ANDROID',
+            cache: new UniversalCache(true, path.join(__dirname, '.cache'))
+        });
+        siap = true;
+        console.log('✅ [YouTubei.js] Recommendation Engine Ready');
+    } catch (err) {
+        console.error('❌ Gagal Inisialisasi YouTubei:', err);
+    }
 })();
 
-// mapping mood → keyword (opsional tapi penting)
 const keywordMood = {
-  senang: 'happy upbeat song',
-  sedih: 'sad emotional song',
-  marah: 'angry rock song',
-  santai: 'chill relaxing song'
+    senang: 'happy upbeat song',
+    sedih: 'sad emotional song',
+    marah: 'angry rock song',
+    santai: 'chill relaxing song'
 };
 
-const dapatkanRekomendasi = async (moodPengguna) => {
-  if (!siap) {
-    return {
-      pesan: 'Bot masih pemanasan sebentar ya 🎧',
-      daftar_lagu: []
-    };
-  }
-
-  const mood = moodPengguna.toLowerCase();
-  const query = keywordMood[mood] || mood;
-
-  try {
-    const hasil = await ytmusic.search(query, 'song');
-
-    const lagu = hasil
-      .filter(l => l.videoId)
-      .slice(0, 3)
-      .map(l => ({
-        judul: `${l.name} - ${l.artist?.name || 'Unknown'}`,
-        id_youtube: l.videoId
-      }));
-
-    if (lagu.length === 0) {
-      return {
-        pesan: `Aku belum nemu lagu yang cocok buat mood "${mood}" 😕`,
-        daftar_lagu: []
-      };
+const dapatkanRekomendasi = async (moodAtauJudul) => {
+    if (!siap || !yt) {
+        return { pesan: 'Bot masih pemanasan... 🎧', daftar_lagu: [] };
     }
 
-    return {
-      pesan: `Ini lagu yang cocok buat mood "${mood}" kamu 🎶`,
-      daftar_lagu: lagu
-    };
+    
+    const moodClean = moodAtauJudul.toLowerCase();
+    
+    let queryPencarian;
+    if (keywordMood[moodClean]) {
+        // Jika input adalah mood (senang, sedih, dll)
+        queryPencarian = keywordMood[moodClean];
+    } else {
+        // Jika input adalah permintaan spesifik (misal: "Aimer", "Lagu Rock", dll)
+        // Kita tambahkan kata "song" agar hasilnya bukan video durasi panjang/playlist
+        queryPencarian = `${moodAtauJudul}`;
+    }
 
-  } catch (err) {
-    console.error('[YTMusic ERROR]', err);
-    return {
-      pesan: 'Terjadi kesalahan saat mencari lagu 😢',
-      daftar_lagu: []
-    };
-  }
+    try {
+        console.log(`🔎 Mencari di YouTube Music: ${queryPencarian}`);
+        
+        const search = await yt.music.search(queryPencarian, { type: 'song' });
+        
+        // YouTubei.js terkadang mengembalikan struktur berbeda, kita buat lebih aman
+        const hasil = search.contents[0]?.contents || [];
+
+        const lagu = hasil
+            .slice(0, 3)
+            .map(song => ({
+                judul: `${song.title} - ${song.artists?.[0]?.name || 'Artist Unknown'}`,
+                id_youtube: song.id || song.videoId
+            }))
+            .filter(l => l.id_youtube); // Pastikan ada ID-nya
+
+        return {
+            pesan: `Ini beberapa lagu yang cocok buat kamu 🎶`,
+            daftar_lagu: lagu
+        };
+
+    } catch (err) {
+        console.error('[YouTubei.js ERROR]', err);
+        return { pesan: 'Gagal mencari lagu 😢', daftar_lagu: [] };
+    }
 };
 
 module.exports = { dapatkanRekomendasi };
-

@@ -1,0 +1,59 @@
+input[type="range"] { 
+    accent-color: #dc2626; 
+}
+
+.hide-scrollbar::-webkit-scrollbar { 
+    display: none; 
+}
+
+html, body {
+    overscroll-behavior-y: contain; /* Mencegah pull-to-refresh saat geser player */
+}  
+
+/* Membuat tampilan range input lebih tipis di mobile */
+input[type="range"] {
+    height: 4px;
+}
+
+/* Mengatur transparansi footer agar tidak terlalu solid */
+#playerFooter {
+    background-color: rgba(24, 24, 27, 0.95);
+}    
+
+#fsThumb {
+    /* Default untuk Mobile */
+    width: 80vw;
+    height: 80vw;
+    max-width: 350px; /* Batas maksimal di HP */
+    max-height: 350px;
+    
+    object-fit: cover;
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+    
+    /* Tambahan penting: Pastikan tidak memakan seluruh tinggi layar */
+    /* Ini menjaga agar tombol kontrol di bawahnya tidak terdorong keluar layar */
+    max-height: 45vh; 
+}
+
+/* Pengaturan khusus untuk Desktop (Layar Lebar) */
+@media (min-width: 768px) {
+    #fsThumb {
+        /* Di desktop, tidak pakai vw (lebar) tapi vh (tinggi) 
+           agar ukurannya pas dengan frame player */
+        width: 200px;  /* Ukuran tetap yang pas untuk desktop */
+        height: 200px;
+        max-width: 400px;
+        max-height: 400px;
+    }
+}
+
+/* Jika layar sangat pendek (misal HP posisi landscape) */
+@media (max-height: 500px) {
+    #fsThumb {
+        width: 120px;
+        height: 120px;
+    }
+}
+
+

@@ -92,10 +92,13 @@ button { cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 .btn-nav:hover, .btn-nav.active { 
     background: var(--primary); color: white; box-shadow: var(--glow-primary);
 }
-.btn-login-nav {
-    background: var(--secondary); color: var(--bg-main); padding: 0.6rem 1.5rem; border-radius: 50px; font-weight: 700; margin-left: 20px;
+
+.btn-labelUser { display: flex; gap: 8px; background: rgba(255,255,255,0.05); padding: 5px; border-radius: 50px; border: 1px solid var(--glass-border); }
+.btn-user-profile {
+    background: transparent; color: var(--text-muted);
+    padding: 0.6rem 1.5rem; border-radius: 50px; font-weight: 600; font-size: 0.9rem;
 }
-.btn-login-nav:hover { box-shadow: 0 0 15px rgba(0, 229, 255, 0.5); }
+.btn-user-profile:hover { background: var(--primary); color: white; box-shadow: var(--glow-primary); }
 
 /* --- 5. HERO SECTION --- */
 .page-content { padding-top: 120px; padding-bottom: 60px; min-height: 100vh; }
