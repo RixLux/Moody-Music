@@ -62,9 +62,11 @@ body {
 }
 
 .gradient-text {
-    background: linear-gradient(135deg, var(--secondary), var(--primary), var(--accent-hot));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    font-weight: 800;
+  background: linear-gradient(135deg, var(--secondary), var(--primary), var(--accent-hot));
+  -webkit-background-clip: text; 
+  background-clip: text;         
+  -webkit-text-fill-color: transparent;
+  font-weight: 800;
 }
 
 button { cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); border: none; }
