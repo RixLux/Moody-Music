@@ -93,7 +93,7 @@ io.on('connection', (soket) => {
             console.error("❌ Gagal simpan DB:", err);
         }
 
-        /* 6. Kirim Email (opsional)
+         6. Kirim Email (opsional)
         if (email && hasilMusik.daftar_lagu.length > 0) {
             pengirimEmail.sendMail(
                 {
@@ -109,7 +109,7 @@ io.on('connection', (soket) => {
                     if (err) console.log("❌ Gagal kirim email:", err);
                 }
             );
-        }*/
+        }
     });
 
     // C. HAPUS RIWAYAT
@@ -146,4 +146,5 @@ const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
     console.log(`🚀 Server berjalan di http://localhost:${PORT}`);
 });
+
 
