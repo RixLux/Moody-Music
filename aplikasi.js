@@ -12,7 +12,6 @@ const basisData = require('./konfigurasi/firebaseInit');
 const pengirimEmail = require('./konfigurasi/transporterEmail');
 const { dapatkanRekomendasi } = require('./layanan/logikaMusik');
 const { buatResponChat } = require('./layanan/layananChat');
-const { prosesChat } = require('./layanan/layananChat');
 
 const aplikasi = express();
 const server = http.createServer(aplikasi);
@@ -41,76 +40,64 @@ io.on('connection', (soket) => {
         );
     });
 
-    // B. CHAT & REKOMENDASI
-    soket.on('kirim_pesan', async (data) => {
-        const { pesanMood } = data;
 
-        /* 1. Ambil Quotes (saya matikan karena quotes terkesan random dan tak masuk akal) fix later!!!
-        let kutipan = "Tetap semangat!";
-        try {
-            const resp = await axios.get('https://zenquotes.io/api/random');
-            kutipan = `"${resp.data[0].q}" — ${resp.data[0].a}`;
-        } catch (e) {
-            console.log("Gagal ambil quotes");
-        } */
+// B. CHAT & REKOMENDASI
+soket.on('kirim_pesan', async (data) => {
+    const { pesanMood, email, nama } = data;
 
-	try {
-		// 1. Ambil respon dari Gemini
-		let teksRespon = await prosesChat(pesanMood);
+    // 1. Ambil Quotes
+    let kutipan = "Tetap semangat!";
+    try {
+        const resp = await axios.get('https://zenquotes.io/api/random');
+        kutipan = `"${resp.data[0].q}" — ${resp.data[0].a}`;
+    } catch (e) {
+        console.log("Gagal ambil quotes");
+    }
 
-		// 2. Inisialisasi variabel hasilMusik agar selalu ada (walau isinya null)
-		let daftarLagu = null;
+    // 2. Rekomendasi Musik
+    const hasilMusik = await dapatkanRekomendasi(pesanMood);
 
-		// 3. Cek apakah ada instruksi rekomendasi
-		if (teksRespon.includes("###REKOMENDASI###")) {
-		    console.log("🎯 Gemini setuju kasih lagu!"); // Untuk debug di terminal
-		    teksRespon = teksRespon.replace("###REKOMENDASI###", "").trim();
+    // 3. Kirim respon ke client 
+    // UPDATE: Kita masukkan hasilMusik.daftar_lagu ke sini agar muncul di chat
+    const teksRespon = buatResponChat(
+        pesanMood, 
+        kutipan, 
+        hasilMusik.daftar_lagu
+    );
 
-		    // Ambil lagu dari YouTubei.js
-		    const hasilMusik = await dapatkanRekomendasi(pesanMood);
-		    daftarLagu = hasilMusik.daftar_lagu;
-		}
-
-		// 4. Kirim ke client (Sekarang daftarLagu sudah didefinisikan)
-		soket.emit('respon_musik', {
-		    teks: teksRespon,
-		    lagu: daftarLagu 
-		});
-
-	    } catch (err) {
-		console.error("❌ Error di socket send_message:", err);
-		soket.emit('pesan_bot', "Maaf, ada gangguan teknis sebentar.");
-	    }
-
-        // 5. Simpan ke Firebase
-        try {
-            await basisData.collection('mood_history').add({
-                username: soket.user ? soket.user.username : 'anon',
-                mood: pesanMood,
-                timestamp: new Date()
-            });
-        } catch (err) {
-            console.error("❌ Gagal simpan DB:", err);
-        }
-
-        /* 6. Kirim Email (opsional)
-        if (email && hasilMusik.daftar_lagu.length > 0) {
-            pengirimEmail.sendMail(
-                {
-                    from: 'aplikasi_musik@gmail.com',
-                    to: email,
-                    subject: '🎵 Rekomendasi Musik Kamu',
-                    text: `Halo ${nama}, ini rekomendasi lagumu:\n\n` +
-                        hasilMusik.daftar_lagu
-                            .map(l => `- ${l.judul}`)
-                            .join('\n')
-                },
-                (err) => {
-                    if (err) console.log("❌ Gagal kirim email:", err);
-                }
-            );
-        }*/
+    soket.emit('respon_musik', {
+        teks: teksRespon,
+        lagu: hasilMusik.daftar_lagu // Tetap kirim data object lagu jika client butuh link/gambar
     });
+
+    // 4. Simpan ke Firebase
+    try {
+        await basisData.collection('mood_history').add({
+            username: soket.user ? soket.user.username : 'anon',
+            mood: pesanMood,
+            recommendations: hasilMusik.daftar_lagu.map(l => l.judul), // Tambahkan ini biar tersimpan di DB
+            timestamp: new Date()
+        });
+    } catch (err) {
+        console.error("❌ Gagal simpan DB:", err);
+    }
+
+    // 5. Kirim Email (opsional - Diupdate agar rapi)
+    if (email && hasilMusik.daftar_lagu.length > 0) {
+        pengirimEmail.sendMail({
+            from: process.env.EMAIL_USER || 'aplikasi_musik@gmail.com',
+            to: email,
+            subject: '🎵 Rekomendasi Musik Kamu',
+            text: `Halo ${nama},\n\n` +
+                  `Mood kamu: ${pesanMood}\n\n` +
+                  `Daftar lagu pilihan:\n` +
+                  hasilMusik.daftar_lagu.map(l => `- ${l.judul} (${l.url})`).join('\n') +
+                  `\n\n💡 ${kutipan}`
+        }, (err) => {
+            if (err) console.log("❌ Gagal kirim email:", err);
+        });
+    }
+});
 
     // C. HAPUS RIWAYAT
     soket.on('hapus_riwayat', async (username) => {

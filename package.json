@@ -4,7 +4,7 @@
   "description": "",
   "main": "ytmusic.js",
   "scripts": {
-    "dev": "nodemon ytmusic.js",
+    "dev": "nodemon aplikasi.js",
     "start": "node aplikasi.js"
   },
   "keywords": [],

@@ -8,10 +8,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="gaya.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css/github-markdown.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://www.youtube.com/iframe_api"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
         /* CSS Navigasi */
@@ -55,6 +57,7 @@
         
         <div class="user-nav" style="display: flex; align-items: center; gap: 20px;">
             <div class="nav-links">
+            <a class="btn-nav" onclick="window.location.href='http://localhost:3000/'">Home</a>
                 <button class="btn-nav" onclick="navigasi('chat', this)">Chat & Player</button> 
                 <button class="btn-nav" onclick="navigasi('about', this)">About</button> 
             </div>
@@ -516,6 +519,7 @@
                 console.error("Gagal load README:", err);
             }
         }
+        
     </script>
 </body>
 </html>
