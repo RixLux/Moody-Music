@@ -1,3 +1,5 @@
+//aplikasi.js
+require('dotenv').config()
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
@@ -10,76 +12,113 @@ const basisData = require('./konfigurasi/firebaseInit');
 const pengirimEmail = require('./konfigurasi/transporterEmail');
 const { dapatkanRekomendasi } = require('./layanan/logikaMusik');
 const { buatResponChat } = require('./layanan/layananChat');
-
+const { prosesChat } = require('./layanan/layananChat');
 
 const aplikasi = express();
 const server = http.createServer(aplikasi);
 const io = socketIo(server);
 
-// Middleware
+// ================= MIDDLEWARE =================
 aplikasi.use(bodyParser.json());
 aplikasi.use(express.static(path.join(__dirname, 'publik')));
-aplikasi.use('/api', ruteApi); 
+aplikasi.use('/api', ruteApi);
 
-// --- LOGIKA SOCKET ---
+aplikasi.get("/README.md", (req, res) => {
+    res.sendFile(path.join(__dirname, "README.md"));
+});
+
+// ================= SOCKET LOGIC =================
 io.on('connection', (soket) => {
     console.log('🔗 Pengguna terhubung');
 
-    // A. LOGIN SUKSES
+    // A. LOGIN
     soket.on('pengguna_masuk', (dataProfil) => {
-        soket.user = dataProfil; 
+        soket.user = dataProfil;
         console.log(`👤 User Online: ${dataProfil.username}`);
-        soket.emit('pesan_bot', `Halo ${dataProfil.nama_lengkap}! Ceritakan mood kamu hari ini.`);
+        soket.emit(
+            'pesan_bot',
+            `Halo ${dataProfil.nama_lengkap}! Ceritakan mood kamu hari ini.`
+        );
     });
 
-    // B. FITUR CHAT
+    // B. CHAT & REKOMENDASI
     soket.on('kirim_pesan', async (data) => {
-        const { pesanMood, email, nama } = data;
-        
-        // 1. Ambil Quotes (API)
-        let kutipan = "";
+        const { pesanMood } = data;
+
+        /* 1. Ambil Quotes (saya matikan karena quotes terkesan random dan tak masuk akal) fix later!!!
+        let kutipan = "Tetap semangat!";
         try {
             const resp = await axios.get('https://zenquotes.io/api/random');
-	    kutipan = `"${resp.data[0].q}" — ${resp.data[0].a}`;
-  	 } catch (e) { kutipan = "Tetap semangat!"; }
+            kutipan = `"${resp.data[0].q}" — ${resp.data[0].a}`;
+        } catch (e) {
+            console.log("Gagal ambil quotes");
+        } */
 
-        // 2. Rekomendasi Musik
-        const hasilMusik = await dapatkanRekomendasi(pesanMood);
-        
-        // 3. Kirim Respon
-        const teksRespon = buatResponChat(pesanMood, kutipan);
+	try {
+		// 1. Ambil respon dari Gemini
+		let teksRespon = await prosesChat(pesanMood);
 
-	soket.emit('respon_musik', {
-    		teks: teksRespon,
-    		lagu: hasilMusik.daftar_lagu
-	});
+		// 2. Inisialisasi variabel hasilMusik agar selalu ada (walau isinya null)
+		let daftarLagu = null;
 
+		// 3. Cek apakah ada instruksi rekomendasi
+		if (teksRespon.includes("###REKOMENDASI###")) {
+		    console.log("🎯 Gemini setuju kasih lagu!"); // Untuk debug di terminal
+		    teksRespon = teksRespon.replace("###REKOMENDASI###", "").trim();
 
-        // 4. Simpan ke Database
+		    // Ambil lagu dari YouTubei.js
+		    const hasilMusik = await dapatkanRekomendasi(pesanMood);
+		    daftarLagu = hasilMusik.daftar_lagu;
+		}
+
+		// 4. Kirim ke client (Sekarang daftarLagu sudah didefinisikan)
+		soket.emit('respon_musik', {
+		    teks: teksRespon,
+		    lagu: daftarLagu 
+		});
+
+	    } catch (err) {
+		console.error("❌ Error di socket send_message:", err);
+		soket.emit('pesan_bot', "Maaf, ada gangguan teknis sebentar.");
+	    }
+
+        // 5. Simpan ke Firebase
         try {
             await basisData.collection('mood_history').add({
                 username: soket.user ? soket.user.username : 'anon',
                 mood: pesanMood,
-                timestamp: new Date().toISOString()
+                timestamp: new Date()
             });
-        } catch (err) { console.error("Gagal simpan DB"); }
+        } catch (err) {
+            console.error("❌ Gagal simpan DB:", err);
+        }
 
-        // 5. Kirim Email (Jika ada lagu)
-        //if (email && hasilMusik.daftar_lagu.length > 0) {
-          //  pengirimEmail.sendMail({
-              //  from: 'aplikasi_musik@gmail.com',
-            //    to: email,
-          //      subject: '🎵 Rekomendasi Musik Kamu',
-        //        text: `Halo ${nama}, ini lagumu: ${hasilMusik.daftar_lagu.map(l=>l.judul).join(', ')}`
-      //      }, (err) => { if(err) console.log("Gagal kirim email"); });
-     //   }
+        /* 6. Kirim Email (opsional)
+        if (email && hasilMusik.daftar_lagu.length > 0) {
+            pengirimEmail.sendMail(
+                {
+                    from: 'aplikasi_musik@gmail.com',
+                    to: email,
+                    subject: '🎵 Rekomendasi Musik Kamu',
+                    text: `Halo ${nama}, ini rekomendasi lagumu:\n\n` +
+                        hasilMusik.daftar_lagu
+                            .map(l => `- ${l.judul}`)
+                            .join('\n')
+                },
+                (err) => {
+                    if (err) console.log("❌ Gagal kirim email:", err);
+                }
+            );
+        }*/
     });
 
-    // C. [BARU] FITUR HAPUS RIWAYAT
+    // C. HAPUS RIWAYAT
     soket.on('hapus_riwayat', async (username) => {
         try {
-            const snapshot = await basisData.collection('mood_history')
-                .where('username', '==', username).get();
+            const snapshot = await basisData
+                .collection('mood_history')
+                .where('username', '==', username)
+                .get();
 
             if (snapshot.empty) {
                 soket.emit('pesan_bot', "Tidak ada riwayat untuk dihapus.");
@@ -87,19 +126,22 @@ io.on('connection', (soket) => {
             }
 
             const batch = basisData.batch();
-            snapshot.docs.forEach((doc) => { batch.delete(doc.ref); });
+            snapshot.docs.forEach((doc) => batch.delete(doc.ref));
             await batch.commit();
 
-            console.log(`🗑️ Riwayat ${username} dihapus.`);
-            soket.emit('riwayat_dihapus', "✅ Riwayat chat berhasil dihapus dari server.");
-            
+            console.log(`🗑️ Riwayat ${username} dihapus`);
+            soket.emit(
+                'riwayat_dihapus',
+                "✅ Riwayat chat berhasil dihapus"
+            );
         } catch (err) {
-            console.error("Gagal hapus:", err);
+            console.error("❌ Gagal hapus riwayat:", err);
             soket.emit('pesan_bot', "Gagal menghapus riwayat.");
         }
     });
 });
 
+// ================= SERVER =================
 const PORT = 3001;
 server.listen(PORT, () => {
     console.log(`🚀 Server berjalan di http://localhost:${PORT}`);

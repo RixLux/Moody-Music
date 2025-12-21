@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moody Music - Player</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-zinc-900 text-white font-sans overflow-hidden">
+
+    <div id="fullscreenPlayer" class="fixed inset-0 bg-zinc-900 z-50 translate-y-full transition-transform duration-500 flex flex-col p-6">
+        <button onclick="toggleFullscreen()" class="flex-none p-2 w-fit text-2xl hover:text-red-500 transition">
+            <i class="fas fa-chevron-down"></i>
+        </button>
+        
+        <div class="flex-1 flex items-center justify-center w-full min-h-0 py-4">
+            <img id="fsThumb" src="https://via.placeholder.com/300" 
+                 class="max-h-full max-w-full aspect-square rounded-xl shadow-2xl object-cover transition-all duration-300">
+        </div>
+
+        <div class="flex-none w-full max-w-md mx-auto pb-10">
+            <div class="text-left mb-8 px-2">
+                <h2 id="fsTitle" class="text-2xl font-bold truncate">Pilih Lagu...</h2>
+                <p id="fsArtist" class="text-zinc-400 text-lg truncate">Artis</p>
+            </div>
+            
+            <div class="px-2 mb-8">
+                <input type="range" id="fsProgressBar" value="0" class="w-full h-1.5 bg-zinc-700 rounded-lg appearance-none cursor-pointer">
+                <div class="flex justify-between text-xs text-zinc-500 mt-2">
+                    <span id="fsCurrTime">0:00</span>
+                    <span id="fsDurTime">0:00</span>
+                </div>
+            </div>
+            
+            <div class="flex items-center justify-between px-4">
+                <button id="fsShuffleBtn" onclick="toggleShuffle()" class="text-xl text-zinc-500 transition-colors">
+                    <i class="fas fa-random"></i>
+                </button>
+                <button onclick="prevSong()" class="text-3xl">
+                    <i class="fas fa-step-backward"></i>
+                </button>
+                <button onclick="togglePlay(event)" class="bg-white text-black w-10 h-10 rounded-full text-3xl flex items-center justify-center hover:scale-10 transition shadow-lg">
+                    <i id="fsPlayIcon" class="fas fa-play ml-1"></i>
+                </button>
+                <button onclick="nextSong(event)" class="text-3xl">
+                    <i class="fas fa-step-forward"></i>
+                </button>
+                <button id="fsRepeatBtn" onclick="toggleRepeat()" class="text-xl text-zinc-500 transition-colors">
+                    <i class="fas fa-redo"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex h-screen">
+        <aside id="sidebar" class="w-64 bg-black p-6 hidden md:flex flex-col border-r border-zinc-800 transition-all duration-300">
+            <div class="flex items-center justify-between mb-8">
+                <h1 class="text-2xl font-bold text-red-600 flex items-center truncate">
+                    <i class="fab fa-youtube mr-2"></i> Moody Music
+                </h1>
+                <button onclick="toggleSidebar()" class="text-zinc-400 hover:text-white transition ml-2">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+            <nav class="space-y-4 text-zinc-400">
+                <a href="#" class="block hover:text-white transition"><i class="fas fa-home mr-3"></i> Home</a>
+                <a href="#" class="block text-white transition font-semibold"><i class="fas fa-search mr-3"></i> Search</a>
+                <a href="#" class="block hover:text-white transition"><i class="fas fa-list mr-3"></i> Library</a>
+            </nav>
+        </aside>
+
+        <main class="flex-1 overflow-y-auto p-4 md:p-8 pb-48 hide-scrollbar">
+            <div class="flex items-center space-x-4 mb-8">
+                <button id="showSidebarBtn" onclick="toggleSidebar()" class="hidden text-zinc-400 hover:text-white transition flex-shrink-0">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+                <div class="flex flex-1 max-w-md">
+                    <input id="searchInput" type="text" placeholder="Cari lagu atau artis..." 
+                        class="w-full bg-zinc-800 border-none rounded-l-full py-2 px-6 focus:ring-1 focus:ring-red-600 outline-none text-sm md:text-base">
+                    <button onclick="searchMusic()" class="bg-red-600 px-6 py-2 rounded-r-full hover:bg-red-700 transition">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>        
+
+            <div id="results" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+                <div class="text-zinc-500 col-span-full text-center mt-20">
+                    <i class="fas fa-music text-4xl mb-4"></i>
+                    <p>Cari lagu untuk memulai pemutaran</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <nav class="md:hidden fixed bottom-0 left-0 w-full bg-zinc-950/95 border-t border-zinc-800 flex justify-around py-3 z-50 backdrop-blur-md">
+        <a href="#" class="flex flex-col items-center text-zinc-400 hover:text-white">
+            <i class="fas fa-home text-lg"></i>
+            <span class="text-[10px] mt-1">Home</span>
+        </a>
+        <a href="#" class="flex flex-col items-center text-white">
+            <i class="fas fa-search text-lg"></i>
+            <span class="text-[10px] mt-1">Search</span>
+        </a>
+        <a href="#" class="flex flex-col items-center text-zinc-400 hover:text-white">
+            <i class="fas fa-list text-lg"></i>
+            <span class="text-[10px] mt-1">Library</span>
+        </a>
+    </nav>
+
+    <footer id="playerFooter" onclick="handleFooterClick(event)" 
+        class="fixed bottom-[110px] md:bottom-0 w-full bg-zinc-900/90 md:bg-zinc-950/95 backdrop-blur-lg border-t border-zinc-800 px-4 py-2 md:p-4 z-40 cursor-pointer">
+        <div class="flex items-center justify-between max-w-7xl mx-auto">
+            <div class="flex items-center space-x-3 w-2/3 md:w-1/4">
+                <img id="currentThumb" src="https://via.placeholder.com/150" class="w-10 h-10 md:w-14 md:h-14 rounded shadow-lg object-cover">
+                <div class="overflow-hidden">
+                    <p id="currentTitle" class="font-semibold text-xs md:text-sm truncate">Pilih Lagu...</p>
+                    <p id="currentArtist" class="text-[10px] md:text-xs text-zinc-400 truncate">Artis</p>
+                </div>
+            </div>
+            
+            <div class="hidden md:flex flex-col items-center w-2/4">
+                <div class="flex items-center space-x-6 mb-2">
+                    <button id="shuffleBtn" onclick="toggleShuffle(event)" class="text-zinc-400 hover:text-white transition"><i class="fas fa-random"></i></button>
+                    <button onclick="prevSong(event)" class="text-xl hover:text-red-500 transition"><i class="fas fa-step-backward"></i></button>
+                    <button id="masterPlay" onclick="togglePlay(event)" class="bg-white text-black w-10 h-10 rounded-full flex items-center justify-center hover:scale-105 transition">
+                        <i id="playIcon" class="fas fa-play ml-1"></i>
+                    </button>
+                    <button onclick="nextSong(event)" class="text-xl hover:text-red-500 transition"><i class="fas fa-step-forward"></i></button>
+                    <button id="repeatBtn" onclick="toggleRepeat(event)" class="text-zinc-400 hover:text-white transition"><i class="fas fa-redo"></i></button>
+                </div>
+                <div class="flex items-center space-x-3 w-full">
+                    <span id="currTime" class="text-[10px] text-zinc-500 w-8 text-right">0:00</span>
+                    <input type="range" id="progressBar" value="0" class="flex-1 h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer">
+                    <span id="durTime" class="text-[10px] text-zinc-500 w-8">0:00</span>
+                </div>
+            </div>
+
+            <div class="flex md:hidden items-center space-x-5 pr-2">
+                <button onclick="togglePlay(event)" class="text-xl px-2"><i id="mobPlayIcon" class="fas fa-play"></i></button>
+                <button onclick="nextSong(event)" class="text-xl px-2"><i class="fas fa-step-forward"></i></button>
+            </div>
+
+            <div class="hidden md:flex items-center justify-end space-x-3 w-1/4">
+                <i class="fas fa-volume-down text-zinc-400"></i>
+                <input type="range" id="volSlider" min="0" max="1" step="0.1" value="1" class="w-24 h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer">
+            </div>
+        </div>
+    </footer>
+    
+    <audio id="audioElement"></audio>
+
+    <script src="script.js"></script>
+</body>
+</html>
