@@ -2,9 +2,9 @@
   "name": "mood-music",
   "version": "1.0.0",
   "description": "",
-  "main": "ytmusic.js",
+  "main": "aplikasi.js",
   "scripts": {
-    "dev": "nodemon ytmusic.js",
+    "dev": "nodemon aplikasi.js",
     "start": "node aplikasi.js"
   },
   "keywords": [],
