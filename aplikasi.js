@@ -92,24 +92,26 @@ io.on('connection', (soket) => {
         } catch (err) {
             console.error("❌ Gagal simpan DB:", err);
         }
-
-         6. Kirim Email (opsional)
-        if (email && hasilMusik.daftar_lagu.length > 0) {
+        // // 6. Kirim Email (opsional)
+        // Gunakan data dari soket.user yang disimpan saat 'pengguna_masuk'
+        if (soket.user && soket.user.email && daftarLagu && daftarLagu.length > 0) {
             pengirimEmail.sendMail(
                 {
-                    from: 'aplikasi_musik@gmail.com',
-                    to: email,
+                    from: process.env.EMAIL_USER, // Ambil dari .env
+                    to: soket.user.email,
                     subject: '🎵 Rekomendasi Musik Kamu',
-                    text: `Halo ${nama}, ini rekomendasi lagumu:\n\n` +
-                        hasilMusik.daftar_lagu
+                    text: `Halo ${soket.user.nama_lengkap || 'User'}, ini rekomendasi lagumu:\n\n` +
+                        daftarLagu
                             .map(l => `- ${l.judul}`)
                             .join('\n')
                 },
                 (err) => {
                     if (err) console.log("❌ Gagal kirim email:", err);
+                    else console.log("📧 Email terkirim ke:", soket.user.email);
                 }
             );
-        }
+		}
+      
     });
 
     // C. HAPUS RIWAYAT
@@ -146,5 +148,6 @@ const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
     console.log(`🚀 Server berjalan di http://localhost:${PORT}`);
 });
+
 
 
