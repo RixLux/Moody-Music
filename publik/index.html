@@ -337,25 +337,25 @@
         function cekEnter(e) { if(e.key === 'Enter') kirimPesan(); }
 
         // --- FUNGSI UTAMA EFEK BERPIKIR ---
-        
+
         function kirimPesan() {
             const inp = document.getElementById('inputMood');
             const text = inp.value.trim();
             if(!text || !userAktif) return;
 
-            // 1. Tampilkan pesan User
+            // Tampilkan pesan User
             tampilkanPesan(text, 'user');
 
-            // 2. Tampilkan Buble "Bot Sedang Berpikir" (Loading)
+            // Aktifkan indikator bot sedang berpikir
             tampilkanLoading();
 
-            // 3. Kirim data ke server
-            socket.emit('kirim_pesan', { 
-                pesanMood: text, 
-                email: userAktif.email, 
-                nama: userAktif.nama_lengkap 
+            // Kirim data ke server (Tanpa kutipan karena Gemini yang buat)
+            socket.emit('kirim_pesan', {
+                pesanMood: text,
+                email: userAktif.email,
+                nama: userAktif.nama_lengkap
             });
-            
+
             inp.value = '';
         }
 
@@ -442,74 +442,78 @@
         
         socket.on('pesan_bot', (msg) => tampilkanPesan(msg, 'bot'));
         
-        // --- MENERIMA RESPON DARI SERVER ---
+
+       // Menerima Respon Gemini & List Musik
         socket.on('respon_musik', (data) => {
-            // [MODIFIKASI] Berikan jeda 1.5 detik agar terlihat mikir
+            // Berikan sedikit delay natural (psikologi AI)
             setTimeout(() => {
-                // 1. Hapus bubble loading
                 hapusLoading();
 
-                // 2. Tampilkan teks balasan bot
+                // Tampilkan teks narasi/empati dari Gemini
                 tampilkanPesan(data.teks, 'bot');
 
-                // 3. Render kartu lagu (jika ada)
-                if(data.lagu) {
-                    const box = document.getElementById('kotak-pesan');
-                    const shouldScroll = smartScroll();
-
-                    data.lagu.forEach((l, index) => {
-                        const wrapper = document.createElement('div');
-                        wrapper.className = 'pesan-wrapper bot';
-                        
-                        const seed = 'MoodBot';
-                        const avatarImg = document.createElement('img');
-                        avatarImg.src = `https://api.dicebear.com/7.x/bottts/svg?seed=${seed}`;
-                        avatarImg.className = 'avatar';
-
-                        const bubble = document.createElement('div');
-                        bubble.className = 'bubble';
-                        bubble.style.width = '100%';
-                        bubble.style.background = 'rgba(0,0,0,0.3)';
-                        
-                        const uniqueId = 'yt-player-' + Math.floor(Math.random() * 1000000);
-                        
-                        const containerVideo = document.createElement('div');
-                        containerVideo.innerHTML = `<div style="font-weight:bold; color:var(--secondary); margin-bottom:5px;">🎵 ${l.judul}</div>`;
-                        
-                        const playerDiv = document.createElement('div');
-                        playerDiv.id = uniqueId;
-                        playerDiv.style.width = '100%';
-                        playerDiv.style.aspectRatio = '16/9';
-                        playerDiv.style.borderRadius = '8px';
-                        
-                        containerVideo.appendChild(playerDiv);
-                        bubble.appendChild(containerVideo);
-                        
-                        wrapper.appendChild(avatarImg);
-                        wrapper.appendChild(bubble);
-                        box.appendChild(wrapper);
-
-                        // Inisialisasi Player
-                        setTimeout(() => {
-                            if (window.YT && window.YT.Player) {
-                                const player = new YT.Player(uniqueId, {
-                                    height: '100%',
-                                    width: '100%',
-                                    videoId: l.id_youtube,
-                                    events: { 'onStateChange': onPlayerStateChange }
-                                });
-                                youtubePlayers.push(player);
-                            }
-                        }, 100);
-                    });
-
-                    if (shouldScroll) {
-                        box.scrollTop = box.scrollHeight;
-                    }
+                // Jika ada lagu, tampilkan dalam layout grid yang rapi, bukan bubble terpisah
+                if(data.lagu && data.lagu.length > 0) {
+                    renderMusicCards(data.lagu);
                 }
-            }, 1500); // <-- Delay 1.5 detik
+            }, 800);
         });
-        
+
+       //Render Kartu Musik agar tidak berantakan
+        function renderMusicCards(daftarLagu) {
+            const box = document.getElementById('kotak-pesan');
+            const shouldScroll = smartScroll();
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'pesan-wrapper bot';
+
+            const avatarImg = document.createElement('img');
+            avatarImg.src = `https://api.dicebear.com/7.x/bottts/svg?seed=MoodBot`;
+            avatarImg.className = 'avatar';
+
+            const containerKartu = document.createElement('div');
+            containerKartu.className = 'bubble music-grid-container'; // Tambahkan class CSS baru nanti
+            containerKartu.style.background = 'transparent';
+            containerKartu.style.padding = '0';
+            containerKartu.style.border = 'none';
+
+            daftarLagu.forEach((l) => {
+                const uniqueId = 'yt-' + Math.random().toString(36).substr(2, 9);
+
+                const card = document.createElement('div');
+                card.className = 'music-card'; // Styling kartu
+                card.innerHTML = `
+            <div class="music-card-info">
+                <i class="fas fa-play-circle"></i>
+                <span><strong>${l.judul}</strong> - ${l.artis || 'Recommended'}</span>
+            </div>
+            <div id="${uniqueId}" class="video-frame"></div>
+        `;
+
+                containerKartu.appendChild(card);
+
+                // Inisialisasi YouTube Player
+                setTimeout(() => {
+                    if (window.YT && window.YT.Player) {
+                        const player = new YT.Player(uniqueId, {
+                            height: '180',
+                            width: '100%',
+                            videoId: l.id_youtube,
+                            playerVars: { 'modestbranding': 1, 'rel': 0 },
+                            events: { 'onStateChange': onPlayerStateChange }
+                        });
+                        youtubePlayers.push(player);
+                    }
+                }, 300);
+            });
+
+            wrapper.appendChild(avatarImg);
+            wrapper.appendChild(containerKartu);
+            box.appendChild(wrapper);
+
+            if (shouldScroll) box.scrollTop = box.scrollHeight;
+        }
+
         async function loadReadme() {
             try {
                 const res = await fetch("/README.md");

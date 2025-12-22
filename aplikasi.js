@@ -11,7 +11,7 @@ const ruteApi = require('./rute/apiRute');
 const basisData = require('./konfigurasi/firebaseInit');
 const pengirimEmail = require('./konfigurasi/transporterEmail');
 const { dapatkanRekomendasi } = require('./layanan/logikaMusik');
-const { buatResponChat } = require('./layanan/layananChat');
+const { buatResponGemini } = require('./layanan/layananChat');
 
 const aplikasi = express();
 const server = http.createServer(aplikasi);
@@ -41,63 +41,50 @@ io.on('connection', (soket) => {
     });
 
 
-// B. CHAT & REKOMENDASI
-soket.on('kirim_pesan', async (data) => {
-    const { pesanMood, email, nama } = data;
+// B. CHAT & REKOMENDASI (REFECTORED)
+    soket.on('kirim_pesan', async (data) => {
+        const { pesanMood, email, nama } = data;
 
-    // 1. Ambil Quotes
-    let kutipan = "Tetap semangat!";
-    try {
-        const resp = await axios.get('https://zenquotes.io/api/random');
-        kutipan = `"${resp.data[0].q}" — ${resp.data[0].a}`;
-    } catch (e) {
-        console.log("Gagal ambil quotes");
-    }
+        try {
+            // 1. Dapatkan Rekomendasi Musik dari YouTube/Logika Musik
+            const hasilMusik = await dapatkanRekomendasi(pesanMood);
+            const daftarLagu = hasilMusik.daftar_lagu || [];
 
-    // 2. Rekomendasi Musik
-    const hasilMusik = await dapatkanRekomendasi(pesanMood);
+            // 2. Gunakan Gemini untuk membuat respon chat utuh
+            // Kamu tidak perlu lagi fetch axios zenquotes di sini,
+            // biarkan Gemini yang membuat quote di dalam fungsinya.
+            const teksRespon = await buatResponGemini(pesanMood, daftarLagu);
 
-    // 3. Kirim respon ke client 
-    // UPDATE: Kita masukkan hasilMusik.daftar_lagu ke sini agar muncul di chat
-    const teksRespon = buatResponChat(
-        pesanMood, 
-        kutipan, 
-        hasilMusik.daftar_lagu
-    );
+            // 3. Kirim respon ke client
+            soket.emit('respon_musik', {
+                teks: teksRespon,
+                lagu: daftarLagu
+            });
 
-    soket.emit('respon_musik', {
-        teks: teksRespon,
-        lagu: hasilMusik.daftar_lagu // Tetap kirim data object lagu jika client butuh link/gambar
+            // 4. Simpan ke Firebase (Async background)
+            basisData.collection('mood_history').add({
+                username: soket.user ? soket.user.username : 'anon',
+                mood: pesanMood,
+                recommendations: daftarLagu.map(l => l.judul),
+                timestamp: new Date()
+            }).catch(err => console.error("❌ Gagal simpan DB:", err));
+
+            // 5. Kirim Email (Jika ada email)
+            if (email && daftarLagu.length > 0) {
+                // Kita kirim teksRespon yang sudah dibuat Gemini agar isi email sama dengan chat
+                pengirimEmail.sendMail({
+                    from: process.env.EMAIL_USER || 'aplikasi_musik@gmail.com',
+                    to: email,
+                    subject: '🎵 Rekomendasi Musik Kamu',
+                    text: `Halo ${nama},\n\nBerikut adalah rangkuman mood kamu:\n\n${teksRespon}`
+                }).catch(err => console.log("❌ Gagal kirim email:", err));
+            }
+
+        } catch (error) {
+            console.error("Error pada flow kirim_pesan:", error);
+            soket.emit('pesan_bot', "Maaf, aku sedang mengalami gangguan teknis. Coba lagi nanti ya.");
+        }
     });
-
-    // 4. Simpan ke Firebase
-    try {
-        await basisData.collection('mood_history').add({
-            username: soket.user ? soket.user.username : 'anon',
-            mood: pesanMood,
-            recommendations: hasilMusik.daftar_lagu.map(l => l.judul), // Tambahkan ini biar tersimpan di DB
-            timestamp: new Date()
-        });
-    } catch (err) {
-        console.error("❌ Gagal simpan DB:", err);
-    }
-
-    // 5. Kirim Email (opsional - Diupdate agar rapi)
-    if (email && hasilMusik.daftar_lagu.length > 0) {
-        pengirimEmail.sendMail({
-            from: process.env.EMAIL_USER || 'aplikasi_musik@gmail.com',
-            to: email,
-            subject: '🎵 Rekomendasi Musik Kamu',
-            text: `Halo ${nama},\n\n` +
-                  `Mood kamu: ${pesanMood}\n\n` +
-                  `Daftar lagu pilihan:\n` +
-                  hasilMusik.daftar_lagu.map(l => `- ${l.judul} (${l.url})`).join('\n') +
-                  `\n\n💡 ${kutipan}`
-        }, (err) => {
-            if (err) console.log("❌ Gagal kirim email:", err);
-        });
-    }
-});
 
     // C. HAPUS RIWAYAT
     soket.on('hapus_riwayat', async (username) => {

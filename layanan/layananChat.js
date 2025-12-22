@@ -1,96 +1,47 @@
-/**
- * Fungsi bantu untuk mengambil item acak dari array
- */
-function randomPick(arr) {
-    return arr[Math.floor(Math.random() * arr.length)];
-}
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-const pembuka = [
-    "Hmm… aku nangkep vibes-nya 🎧",
-    "Oke, dengerin ini ya 👀",
-    "Mood kamu kedengeran banget sih, coba ini:",
-    "Kalau lagi kayak gini… aku punya sesuatu 🎶",
-    "Ini cocok banget sama perasaan kamu sekarang.",
-    "Biar lagunya yang bicara ya..."
-];
-
-const penutup = [
-    "Semoga sedikit nemenin ya.",
-    "Pelan-pelan aja, gak apa-apa.",
-    "Dengerin sambil tarik napas dalam-dalam.",
-    "Kalau mau cerita lagi, aku di sini kok.",
-    "Kadang musik lebih jujur dari kata-kata.",
-    "Enjoy the music, you deserve it."
-];
-
-const gayaMood = {
-    sedih: [
-        "Kayaknya lagi berat ya hari ini? Gapapa, keluarin aja.",
-        "Lagi pengen diem tapi ditemenin musik? Aku ngerti kok.",
-        "Dunia kadang emang gitu, musik ini buat kamu."
-    ],
-    senang: [
-        "Kelihatan lagi cerah banget nih hari kamu! 🌤️",
-        "Wah, energinya nular sampe sini! Let's go!",
-        "Momen kayak gini emang paling pas dirayain pake lagu."
-    ],
-    marah: [
-        "Lagi pengen meledak ya? Keluarin lewat musik ini biar lega.",
-        "Gas pol aja, jangan dipendam sendiri. 💥",
-        "Kadang distorsi gitar emang obat paling ampuh buat kesel."
-    ],
-    santai: [
-        "Chill dulu sebentar, dunia nggak bakal lari kok. ☕",
-        "Vibes-nya udah dapet banget, tinggal tambah lagu ini.",
-        "Tarik napas, santai, dan nikmati momennya."
-    ],
-    galau: [
-        "Lagi terjebak di antara masa lalu ya? Hehe.",
-        "Emang paling enak galau ditemenin lagu yang 'kena' banget.",
-        "Nggak apa-apa mellow dikit, asal jangan kelamaan ya."
-    ],
-    default: [
-        "Mood itu unik, dinikmati aja prosesnya.",
-        "Perasaan kamu valid kok, tenang aja.",
-        "Apapun rasanya, musik selalu punya tempat."
-    ]
-};
+// Inisialisasi Gemini (Pastikan simpan API Key di .env)
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
 /**
- * Fungsi Utama Pembuat Pesan Chat
- * @param {string} mood - Input mood dari user
- * @param {string} kutipan - Quote yang ingin ditampilkan
- * @param {Array} daftarLagu - Array berisi objek lagu dari fungsi rekomendasi
+ * Fungsi baru menggunakan Gemini untuk menghasilkan respon chatbot
  */
-function buatResponChat(mood, kutipan,daftarLagu = []) {
-    const m = mood.toLowerCase();
+async function buatResponGemini(userInput, daftarLagu = []) {
+    // Kita buat prompt yang kuat agar Gemini tahu perannya
+    const prompt = `
+    Kamu adalah asisten musik yang sangat empatik dan puitis.
+    User sedang merasa: "${userInput}"
+    Lagu yang direkomendasikan: ${daftarLagu.map(l => `${l.judul} oleh ${l.artis}`).join(", ")}
+
+    Tugas kamu:
+    1. Analisis perasaan user dari input tersebut.
+    2. Berikan tanggapan yang hangat, tidak kaku, dan relate dengan perasaannya.
+    3. Hubungkan perasaan tersebut dengan daftar lagu yang diberikan.
+    4. Berikan satu kutipan (quote) penyemangat yang original dan relevan.
+    5. Gunakan bahasa Indonesia yang santai tapi bermakna (pake 'aku-kamu').
+
+    Format output (Gunakan Markdown):
+        *Analisis Singkat*
+        [Isi tanggapan empati kamu]
     
-// Logika penentuan mood key
-    let moodKey = "default";
-    if (m.includes("sedih") || m.includes("sad") || m.includes("nangis")) moodKey = "sedih";
-    else if (m.includes("senang") || m.includes("happy") || m.includes("ceria")) moodKey = "senang";
-    else if (m.includes("marah") || m.includes("kesel") || m.includes("emosi")) moodKey = "marah";
-    else if (m.includes("santai") || m.includes("chill") || m.includes("relax")) moodKey = "santai";
-    else if (m.includes("galau") || m.includes("broken")) moodKey = "galau";
+        *Rekomendasi Lagu untukmu:*
+        - 🎵 [Judul] - [Artis] ([Alasan singkat kenapa cocok])
+        - ...
+    
+        > [Quote dalam bahasa Indonesia]
+    
+        [Kalimat penutup]
+    `;
 
-    // 1. Format daftar lagu menjadi string berderet dengan emoji 🎵
-    const listLaguTeks = daftarLagu.length > 0 
-        ? daftarLagu.map(lagu => `🎵 ${lagu.judul} - ${lagu.artis}`).join('\n')
-        : "Maaf, aku gagal narik daftar lagunya 😅";
-
-    // 2. Susun pesan akhir
-    return `
-${randomPick(gayaMood[moodKey])}
-
-${randomPick(pembuka)}
-Aku nemu beberapa lagu buat mood **"${mood}"** kamu:
-
-${listLaguTeks}
-
-💡 *"${kutipan}"*
-
-${randomPick(penutup)}
-`.trim();
+    try {
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        return response.text();
+    } catch (error) {
+        console.error("Gemini Error:", error);
+        return "Aduh, kepalaku lagi agak pusing, tapi dengerin lagu ini dulu ya...";
+    }
 }
 
-module.exports = { buatResponChat };
+module.exports = { buatResponGemini };
