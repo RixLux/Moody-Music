@@ -1,12 +1,16 @@
 const nodemailer = require('nodemailer');
 
-// Konfigurasi pengirim email menggunakan Environment Variables
 const pengirimEmail = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false, // Use SSL
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
-    }
+    },
+    // Add this to help debug
+    debug: true,
+    logger: true 
 });
 
 module.exports = pengirimEmail;
