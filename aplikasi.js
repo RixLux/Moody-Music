@@ -41,7 +41,7 @@ io.on('connection', (soket) => {
     });
 
 
-// B. CHAT & REKOMENDASI (REFECTORED)
+// B. CHAT & REKOMENDASI
     soket.on('kirim_pesan', async (data) => {
         const { pesanMood, email, nama } = data;
 
@@ -51,8 +51,6 @@ io.on('connection', (soket) => {
             const daftarLagu = hasilMusik.daftar_lagu || [];
 
             // 2. Gunakan Gemini untuk membuat respon chat utuh
-            // Kamu tidak perlu lagi fetch axios zenquotes di sini,
-            // biarkan Gemini yang membuat quote di dalam fungsinya.
             const teksRespon = await buatResponGemini(pesanMood, daftarLagu);
 
             // 3. Kirim respon ke client
@@ -116,7 +114,7 @@ io.on('connection', (soket) => {
 });
 
 // ================= SERVER =================
-const PORT = 3001;
+const PORT = 10000;
 server.listen(PORT, () => {
     console.log(`🚀 Server berjalan di http://localhost:${PORT}`);
 });
