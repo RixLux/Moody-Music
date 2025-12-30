@@ -1,40 +1,47 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+// Inisialisasi Gemini (Pastikan simpan API Key di .env)
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-// Gunakan model ini, biasanya paling stabil
-const model = genAI.getGenerativeModel({ 
-    model: "gemini-2.5-flash" 
-});
+/**
+ * Fungsi baru menggunakan Gemini untuk menghasilkan respon chatbot
+ */
+async function buatResponGemini(userInput, daftarLagu = []) {
+    // Kita buat prompt yang kuat agar Gemini tahu perannya
+    const prompt = `
+    Kamu adalah asisten musik yang sangat empatik dan puitis.
+    User sedang merasa: "${userInput}"
+    Lagu yang direkomendasikan: ${daftarLagu.map(l => `${l.judul} oleh ${l.artis}`).join(", ")}
 
-async function prosesChat(pesanMood) {
+    Tugas kamu:
+    1. Analisis perasaan user dari input tersebut.
+    2. Berikan tanggapan yang hangat, tidak kaku, dan relate dengan perasaannya.
+    3. Hubungkan perasaan tersebut dengan daftar lagu yang diberikan.
+    4. Berikan satu kutipan (quote) penyemangat yang original dan relevan.
+    5. Gunakan bahasa Indonesia yang santai tapi bermakna (pake 'aku-kamu').
+
+    Format output (Gunakan Markdown):
+        *Analisis Singkat*
+        [Isi tanggapan empati kamu]
+    
+        *Rekomendasi Lagu untukmu:*
+        - 🎵 [Judul] - [Artis] ([Alasan singkat kenapa cocok])
+        - ...
+    
+        > [Quote dalam bahasa Indonesia]
+    
+        [Kalimat penutup]
+    `;
+
     try {
-        // Pindahkan systemInstruction ke dalam prompt jika model lama bermasalah dengan systemInstruction
-	const prompt = `
-	Sistem: Kamu adalah teman curhat musik yang empati. 
-	instruksi:
-	1.gunakan bahasa gaul
-	2.setiap pesan dari user kamu langsung respon dengan nyariin lagunya
-
-
-
-	User: ${pesanMood}`;
-
         const result = await model.generateContent(prompt);
         const response = await result.response;
-        let teks = response.text().trim();
-        
-       
-        const kataKunciMusik = ["lagu", "musik", "dengerin", "nyanyi", "song"];
-        if (kataKunciMusik.some(kata => teks.toLowerCase().includes(kata)) && !teks.includes("###REKOMENDASI###")) {
-            teks += "\n\n###REKOMENDASI###";
-        }
-
-        return teks;
-        
+        return response.text();
     } catch (error) {
-        console.error("❌ Gemini Error:", error);
-        return "Aku dengerin kamu kok. Cerita aja lagi kalau masih ada yang ganjel...";
+        console.error("Gemini Error:", error);
+        return "Aduh, kepalaku lagi agak pusing, tapi dengerin lagu ini dulu ya...";
     }
 }
 
-module.exports = { prosesChat };
+module.exports = { buatResponGemini };
