@@ -41,7 +41,7 @@ io.on('connection', (soket) => {
     });
 
 
-// B. CHAT & REKOMENDASI
+// B. CHAT & REKOMENDASI -m
     soket.on('kirim_pesan', async (data) => {
         const { pesanMood, email, nama } = data;
 
