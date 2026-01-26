@@ -146,9 +146,19 @@ site/
 __pycache__/
 *.pyc
 
+# OS / IDE files
+.DS_Store
+*.swp
+*.swo
+.idea/
+.vscode/
 
 # Ignore folder cache YouTubei
 .cache/
 
-# Jaga-jaga jika masih ada yang tertinggal di root
+# just incase
 *-player-script.js
+
+# Builds
+dist/
+build/

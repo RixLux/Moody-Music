@@ -1,9 +1,11 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-// Inisialisasi Gemini (Pastikan simpan API Key di .env)
+// Inisialisasi Gemini
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
+// Ambil model dari .env, kalau lupa diisi bakal default ke gemini-1.5-flash
+const namaModel = process.env.GEMINI_MODEL || "gemini-1.5-flash";
+const model = genAI.getGenerativeModel({ model: namaModel });
 /**
  * Fungsi baru menggunakan Gemini untuk menghasilkan respon chatbot
  */
